@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login & Reset - My Project</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        /* Aapka wahi purana CSS yahan aayega */
+        .login-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; background: #f4f7f6; }
+        .login-card { background: white; padding: 30px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        .input-group { margin-bottom: 15px; }
+        .custom-input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        .primary-btn { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        .eye-icon { cursor: pointer; margin-left: -30px; }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        
+        <div id="loginStep">
+            <h2>Welcome Back</h2>
+            <div class="input-group">
+                <input type="text" id="loginUsername" placeholder="Username" class="custom-input">
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Password" class="custom-input">
+            </div>
+            <button class="primary-btn" onclick="handleLogin()">Login</button>
+            <p><a href="#" onclick="showStep('forgotStep')">Forgot Password?</a></p>
+        </div>
+
+        <div id="forgotStep" class="hidden">
+            <h2>Reset Password</h2>
+            <p>Enter email for secure reset link.</p>
+            <div class="input-group">
+                <input type="email" id="resetEmail" placeholder="Enter Registered Email" class="custom-input">
+            </div>
+            <button class="primary-btn" onclick="sendResetEmail()">Send Reset Link</button>
+            <p><a href="#" onclick="showStep('loginStep')">Back to Login</a></p>
+        </div>
+
+        <div id="resetStep" class="hidden">
+            <h2>New Password</h2>
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="New Password" class="custom-input">
+            </div>
+            <div class="input-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="custom-input">
+            </div>
+            <button class="primary-btn" onclick="updatePassword()">Update Password</button>
+        </div>
+
+    </div>
+</div>
+<script>
+    // 1. Initialize EmailJS with your New Public Key
+    emailjs.init("hmFOSFSMZ9w6YN5hy");
+
+    function showStep(stepId) {
+        document.getElementById('loginStep').classList.add('hidden');
+        document.getElementById('forgotStep').classList.add('hidden');
+        document.getElementById('resetStep').classList.add('hidden');
+        document.getElementById(stepId).classList.remove('hidden');
+    }
+
+    // URL se token check karne ke liye (Reset link logic)
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('token')) {
+            showStep('resetStep');
+        }
+    };
+
+    // --- 1. LOGIN LOGIC ---
+    // --- 1. LOGIN LOGIC (Django Connect) ---
+   async function handleLogin() {
+    const usernameValue = document.getElementById('loginUsername').value; // 'Anup'
+    const passwordValue = document.getElementById('loginPassword').value;
+
+    const res = await fetch('http://127.0.0.1:8000/api/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            username: usernameValue, 
+            password: passwordValue 
+        })
+    });
+
+    const data = await res.json();
+    if (data.status === "success") {
+       
+        alert("Login Successful!");
+        window.location.href = "/mine"; 
+    } else {
+        alert(data.message);
+    }
+}
+    // --- 2. FORGOT PASSWORD (Django + EmailJS) ---
+    async function sendResetEmail() {
+        const email = document.getElementById('resetEmail').value;
+        if(!email) return alert("Email taka!");
+
+        // Django kade check kara ki ha email register aahe ka
+        const res = await fetch('http://127.0.0.1:8000/api/check-email/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await res.json();
+
+        if (data.status === "success") {
+            const templateParams = {
+                user_email: email,
+                // Django cha token link (Tula local testing sathi ha URL lagel)
+                reset_link: `http://127.0.0.1:8000/login/?token=${data.token}`
+            };
+
+            emailjs.send('service_7rnshj4', 'template_evrau9m', templateParams, 'hmFOSFSMZ9w6YN5hy')
+            .then(() => {
+                alert('Reset link tumchya email var pathavli aahe!');
+                showStep('loginStep'); 
+            });
+        } else {
+            alert("Email सापडला नाही!");
+        }
+    }
+
+    // --- 3. UPDATE PASSWORD LOGIC ---
+    async function updatePassword() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if(!newPassword || newPassword !== confirmPassword) {
+            return alert("Passwords match nahi kar rahe!");
+        }
+
+       const res = await fetch('http://127.0.0.1:8000/api/update-password/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ 
+            token: token,           // URL madhun aalela token
+            new_password: newPassword  // Input madhla navin password
+        })
+    });
+
+    const data = await res.json();
+    if (data.status === "success") {
+        alert("✅ Password Badallay! Aata Navin Password ne Login kar.");
+        window.location.href = "/login"; 
+    } else {
+        alert("❌ Error: " + data.message);
+    }
+    }
+</script>
+</body>
+</html>

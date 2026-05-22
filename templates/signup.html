@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - My Project</title>
+    <style>
+        /* CSS Section */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 { font-size: 28px; margin-bottom: 25px; color: #333; }
+
+        .input-group { margin-bottom: 20px; position: relative; }
+
+        .custom-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .password-wrapper { display: flex; align-items: center; position: relative; }
+
+        .eye-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary-btn:hover { background-color: #0056b3; }
+
+        .forgot-link { margin-top: 20px; }
+        .forgot-link a { text-decoration: none; color: #007bff; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Create Account</h2>
+        
+        <form id="signupForm">
+            <div class="input-group">
+                <input type="text" id="regUsername" placeholder="Username" class="custom-input" required>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="regEmail" placeholder="Email Address" class="custom-input" required>
+            </div>
+
+            <div class="input-group password-wrapper">
+                <input type="password" id="regPassword" placeholder="Password" class="custom-input" required>
+                <span class="eye-icon" onclick="togglePass('regPassword')">🔒</span>
+            </div>
+
+            <div class="input-group password-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="custom-input" required>
+                <span class="eye-icon" onclick="togglePass('confirmPassword')">🔒</span>
+            </div>
+
+            <button type="submit" class="primary-btn">Sign Up</button>
+        </form>
+
+        <div class="forgot-link">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+</div>
+<script>
+    // 1. Password Show/Hide Function (Tera Original)
+    function togglePass(id) {
+        const input = document.getElementById(id);
+        const icon = input.nextElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "👁️";
+        } else {
+            input.type = "password";
+            icon.innerHTML = "🔒";
+        }
+    }
+
+    // 2. Form Submit Function
+   // Sign Up Form cha Script Section
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); 
+    
+    const username = document.getElementById('regUsername').value; // User cha Nickname
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const confirmPass = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPass) {
+        alert("Passwords do not match!");
+        return;
+    }
+
+    // --- TUZYA LOGIC NUSAR UNIQUE ID GENERATE KARNE ---
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    let uniqueID = ""; 
+    for (let i = 0; i < 3; i++) uniqueID += letters.charAt(Math.floor(Math.random() * letters.length));
+    for (let i = 0; i < 4; i++) uniqueID += numbers.charAt(Math.floor(Math.random() * numbers.length));
+
+    try {
+        // --- DJANGO API CALL ---
+        // --- DJANGO API CALL ---
+        const response = await fetch('http://127.0.0.1:8000/api/signup/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: username,  // <--- 'nickname' chya jagi 'username' kara
+                email: email, 
+                password: password,
+                user_id: uniqueID    
+            })
+        });
+
+        const data = await response.json();
+
+     if (data.status === "success") {
+            alert("✅ Account Banlay! Aata Login kar.");
+            window.location.href = "/login"; 
+        } else {
+            // Ithe check kar kay message yetoy
+            alert("❌ Error: " + data.message); 
+        }
+    } catch (error) {
+        alert("Django Server chalu aahe ka check kar!");
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Mines Game</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --green: #4caf50;
+            --red: #f44336;
+            --text: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            padding-bottom: 80px;
+        }
+
+        .account-header {
+            background: #1a1a1a;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--gold);
+            color: black;
+        }
+
+        .account-header h2 {
+            flex: 1;
+            text-align: center;
+            color: var(--gold);
+        }
+
+        .profile-card {
+            background: var(--card);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .avatar {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .user-id {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .wallet-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+            text-align: center;
+        }
+
+        .wallet-label {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .wallet-balance {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--gold);
+            margin: 10px 0;
+        }
+
+        .wallet-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .btn-deposit, .btn-withdraw {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .btn-deposit {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-deposit:hover {
+            background: #45a049;
+        }
+
+        .btn-withdraw {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-withdraw:hover {
+            background: #d32f2f;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin: 20px;
+        }
+
+        .stat-mini-card {
+            flex: 1;
+            background: var(--card);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .stat-mini-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .stat-mini-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--gold);
+            margin-top: 5px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px;
+        }
+
+        .info-card {
+            background: var(--card);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .stats-section {
+            margin: 20px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--gold);
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .stat-box {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+            border: 1px solid #333;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--green);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .transactions-section {
+            margin: 20px;
+        }
+
+        .transactions-title {
+            font-size: 16px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .transaction-item {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-left {
+            flex: 1;
+        }
+
+        .transaction-id {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .transaction-type {
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+
+        .transaction-date {
+            font-size: 10px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .transaction-right {
+            text-align: right;
+        }
+
+        .transaction-amount {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .transaction-status {
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+        .status-completed { color: var(--green); }
+        .status-pending { color: orange; }
+        .status-failed { color: var(--red); }
+
+        .deposit-amount { color: var(--green); }
+        .withdraw-amount { color: var(--red); }
+        .fee-amount { color: orange; }
+        .reward-amount { color: #00bcd4; }
+
+        .logout-btn-container {
+            margin: 20px;
+            text-align: center;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--red);
+            color: #ff6b6b;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .logout-btn:hover {
+            background: var(--red);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 320px;
+            text-align: center;
+            border: 1px solid var(--gold);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: var(--gold);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
+            background: #333;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--green);
+        }
+
+        .gateway-select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
+            background: #333;
+            color: white;
+            font-size: 14px;
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1a1a1a;
+            display: flex;
+            height: 60px;
+            border-top: 1px solid #333;
+            z-index: 2000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+        }
+
+        .nav-item span {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .message {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 4000;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .message-success {
+            background: var(--green);
+            color: white;
+        }
+
+        .message-error {
+            background: var(--red);
+            color: white;
+        }
+
+        @keyframes slideDown {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+            to {
+                top: 70px;
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="account-header">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <h2>My Account</h2>
+        <div style="width: 60px;"></div>
+    </div>
+
+    <div class="profile-card">
+        <div class="avatar">👤</div>
+        <div class="username">{{ user_name }}</div>
+        <div class="user-id">🆔 {{ user_id }}</div>
+    </div>
+
+    <div class="wallet-card">
+        <div class="wallet-label">💰 Main Balance</div>
+        <div class="wallet-balance">₹{{ wallet_balance|floatformat:2 }}</div>
+        <div class="wallet-buttons">
+            <button class="btn-deposit" onclick="openDepositModal()">➕ Deposit</button>
+            <button class="btn-withdraw" onclick="openWithdrawModal()">💸 Withdraw</button>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-mini-card">
+            <div class="stat-mini-label">Total Deposited</div>
+            <div class="stat-mini-value">₹{{ total_deposit|floatformat:2 }}</div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-mini-label">Total Withdrawn</div>
+            <div class="stat-mini-value">₹{{ total_withdraw|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <span class="info-label">📧 Email Address</span>
+            <span class="info-value">{{ user_email }}</span>
+        </div>
+        <div class="info-card">
+            <span class="info-label">📅 Joined On</span>
+            <span class="info-value">{{ joined_date }}</span>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-title">📊 Game Statistics</div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">{{ total_wins }}</div>
+                <div class="stat-label">Total Wins</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">🏆</div>
+                <div class="stat-label">Wins Claimed</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="transactions-section">
+        <div class="transactions-title">📜 Transaction History</div>
+        {% if transactions %}
+            {% for transaction in transactions %}
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-id">{{ transaction.transaction_id }}</div>
+                    <div class="transaction-type">{{ transaction.get_transaction_type_display }}</div>
+                    <div class="transaction-date">{{ transaction.created_at|date:"d M Y, h:i A" }}</div>
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount 
+                        {% if transaction.transaction_type == 'DEPOSIT' %}deposit-amount
+                        {% elif transaction.transaction_type == 'WITHDRAW' %}withdraw-amount
+                        {% elif transaction.transaction_type == 'GAME_FEE' %}fee-amount
+                        {% elif transaction.transaction_type == 'WIN_REWARD' %}reward-amount
+                        {% endif %}">
+                        {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'WIN_REWARD' %}
+                        + ₹{{ transaction.amount }}
+                        {% else %}
+                        - ₹{{ transaction.amount }}
+                        {% endif %}
+                    </div>
+                    <div class="transaction-status status-{{ transaction.status|lower }}">{{ transaction.status }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #666;">No transactions yet. Make a deposit to get started!</p>
+        {% endif %}
+    </div>
+
+    <div class="logout-btn-container">
+        <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+    </div>
+
+    <!-- Deposit Modal - FIXED -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <h3>💰 Deposit Money</h3>
+            <p style="font-size: 12px; color: #aaa;">Minimum ₹10 | Maximum ₹50,000</p>
+            <input type="number" id="depositAmount" class="modal-input" placeholder="Enter amount" min="10" max="50000" step="10">
+            <select id="gatewaySelect" class="gateway-select">
+                <option value="phonepe">📱 PhonePe (UPI)</option>
+                <option value="nextpay">💳 Card / NetBanking</option>
+            </select>
+            <button class="btn-deposit" style="width: 100%; margin-bottom: 10px;" onclick="submitDeposit()">
+                Deposit Now
+            </button>
+            <button class="back-btn" style="width: 100%;" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <h3>💸 Withdraw Money</h3>
+            <p style="font-size: 12px; color: #aaa;">Minimum ₹50 | Current Balance: ₹{{ wallet_balance|floatformat:2 }}</p>
+            <p style="font-size: 11px; color: #ff9800;">⚠️ Funds will be on hold until admin approval</p>
+            
+            <input type="number" id="withdrawAmount" class="modal-input" placeholder="Enter amount" min="50" step="10">
+            <input type="text" id="withdrawUpiId" class="modal-input" placeholder="Your UPI ID (e.g., username@okhdfcbank)" required>
+            
+            <button class="btn-withdraw" style="width: 100%; margin-bottom: 10px;" onclick="submitWithdraw()">
+                Request Withdrawal
+            </button>
+            <button class="back-btn" style="width: 100%;" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-item" onclick="goHome()">
+            <span>🏠</span>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="goHistory()">
+            <span>📜</span>
+            <span>History</span>
+        </div>
+        <div class="nav-item active">
+            <span>👤</span>
+            <span>Account</span>
+        </div>
+    </nav>
+
+    <script>
+        function goBack() {
+            window.location.href = '/mine';
+        }
+
+        function goHome() {
+            window.location.href = '/mine';
+        }
+
+        function goHistory() {
+            window.location.href = '/history/';
+        }
+
+        function openDepositModal() {
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+
+        function openWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+
+        function closeModals() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        // FIXED: Deposit function with gateway selection
+        async function submitDeposit() {
+            const amount = document.getElementById('depositAmount').value;
+            const gateway = document.getElementById('gatewaySelect').value;
+            
+            if (!amount || amount < 10) {
+                showMessage('Minimum deposit is ₹10', 'error');
+                return;
+            }
+            
+            if (amount > 50000) {
+                showMessage('Maximum deposit is ₹50,000', 'error');
+                return;
+            }
+            
+            const depositBtn = document.querySelector('#depositModal .btn-deposit');
+            depositBtn.disabled = true;
+            depositBtn.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('/api/deposit/initiate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ 
+                        amount: parseFloat(amount),
+                        gateway: gateway
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.payment_url) {
+                    window.location.href = data.payment_url;
+                } else {
+                    showMessage(data.message || 'Payment initialization failed', 'error');
+                    depositBtn.disabled = false;
+                    depositBtn.textContent = 'Deposit Now';
+                }
+            } catch (error) {
+                showMessage('Something went wrong!', 'error');
+                depositBtn.disabled = false;
+                depositBtn.textContent = 'Deposit Now';
+            }
+        }
+
+        // FIXED: Withdraw function - correct API endpoint
+        async function submitWithdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            const upiId = document.getElementById('withdrawUpiId').value;
+            const balance = {{ wallet_balance|floatformat:2 }};
+            
+            if (!amount || amount < 50) {
+                showMessage('Minimum withdrawal is ₹50', 'error');
+                return;
+            }
+            
+            if (amount > balance) {
+                showMessage('Insufficient balance!', 'error');
+                return;
+            }
+            
+            if (!upiId || upiId.trim() === '') {
+                showMessage('Please enter your UPI ID', 'error');
+                return;
+            }
+            
+            if (!upiId.includes('@')) {
+                showMessage('Please enter a valid UPI ID (e.g., username@okhdfcbank)', 'error');
+                return;
+            }
+            
+            const withdrawBtn = document.querySelector('#withdrawModal .btn-withdraw');
+            withdrawBtn.disabled = true;
+            withdrawBtn.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('/api/withdraw/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ 
+                        amount: parseFloat(amount),
+                        upi_id: upiId.trim()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage(data.message, 'success');
+                    closeModals();
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showMessage(data.message, 'error');
+                    withdrawBtn.disabled = false;
+                    withdrawBtn.textContent = 'Request Withdrawal';
+                }
+            } catch (error) {
+                showMessage('Something went wrong!', 'error');
+                withdrawBtn.disabled = false;
+                withdrawBtn.textContent = 'Request Withdrawal';
+            }
+        }
+
+        function showMessage(msg, type) {
+            const existingMsg = document.querySelector('.message');
+            if (existingMsg) existingMsg.remove();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = msg;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        async function handleLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = '/logout/';
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Mines Rewards Game</title>
+        <style>
+            :root {
+            --gold: #d4af37; --bg: #121212; --card: #1e1e1e;
+            --green: #4caf50; --red: #c62828; --text: #f5f5f5;
+            }
+
+            body {
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 70px;
+            }
+
+            /* --------- NAYA HEADER STYLE --------- */
+            #game-header {
+            background: #1a1a1a;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+            color: var(--gold);
+            }
+            .header-hidden { display: none !important; }
+
+        /*footer*/
+        .nav-hidden { display: none !important; }
+
+            /* --------- Screens & Modals --------- */
+            .screen { display: none; padding: 20px; text-align: center; min-height: 100vh; }
+            .active-screen { display: block; animation: fadeIn 0.4s; }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+            .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
+            }
+            .modal-content {
+            background: var(--card); padding: 30px; border-radius: 15px; width: 85%; max-width: 320px; 
+            text-align: center; border: 1px solid #333;
+            }
+
+            /* --------- Buttons --------- */
+            .btn {
+            padding: 12px 30px; border-radius: 8px; border: none; 
+            font-weight: bold; cursor: pointer; min-width: 200px; font-size: 1rem; transition: 0.3s;
+            }
+            .btn-start { background: var(--green); color: white; }
+            .btn-gold { background: var(--gold); color: black; }
+            .btn-how { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+
+            /* --------- Game Board --------- */
+            #gameBoard {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+            max-width: 320px; margin: 20px auto;
+            }
+            .tile { aspect-ratio: 1/1; background: #333; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+            .tile.safe { background: var(--green); }
+            .tile.bomb { background: var(--red); }
+
+            /* --------- Scratch Area --------- */
+            .scratch-area {
+            background: linear-gradient(135deg, #444, #222);
+            height: 120px; line-height: 120px; border-radius: 10px;
+            border: 2px dashed var(--gold); cursor: pointer; font-weight: bold; margin: 15px 0;
+            }
+
+            .verify-input {
+            background: #000; border: 2px solid var(--gold); color: var(--gold);
+            padding: 12px; border-radius: 8px; width: 85%; text-align: center;
+            font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; outline: none;
+            }
+
+            .bomb-select {
+            width: 100%; padding: 10px; margin: 15px 0; background: #333; color: white; border: 1px solid var(--gold); border-radius: 5px;
+            }
+
+            /* FOOTER FIXED: Z-INDEX 2000 TAAKI POPUP KE UPAR DIKHE */
+            .nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; height: 60px; border-top: 1px solid #333; z-index: 2000; }
+            .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; color: #888; }
+            .nav-item.active { color: var(--gold); }
+
+
+            /* logout CSS*/
+                       .mini-logout-box {
+    position: absolute;
+    top: 30px; /* Username chya ekdam khali */
+    left: 0;
+    background: #222;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: none; /* Survatila hidden */
+    z-index: 3000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    min-width: 100px;
+}
+
+.logout-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.logout-content:hover {
+    color: var(--red);
+}
+
+.logout-content img {
+    filter: invert(1); /* Icon la pandhra karnyasaathi */
+}
+        </style>
+        </head>
+        <body>
+
+        <div id="game-header">
+    <div style="position: relative; display: inline-block;">
+        <span onclick="toggleLogoutBox()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            👤 <b>{{ user_name }}</b> ▼
+        </span>
+        
+        <div id="logoutBox" class="mini-logout-box">
+            <div class="logout-content" onclick="finalLogout()">
+                <img src="https://cdn-icons-png.flaticon.com/512/182/182448.png" width="18">
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
+    <span>🆔 <b>{{ user_id }}</b></span>
+</div>
+
+        <div id="homeScreen" class="screen active-screen">
+            <div style="margin-top: 80px; font-size: 80px;">💣</div>
+            <h1>MINES ESCAPE</h1>
+            <div style="display: flex; flex-direction: column; gap: 15px; align-items: center; margin-top: 40px;">
+            <button class="btn btn-start" onclick="toggleModal('selectModal', true)">START GAME</button>
+            <button class="btn btn-how" onclick="toggleModal('howModal', true)">HOW TO PLAY</button>
+            </div>
+        </div>
+
+        <div id="selectModal" class="modal">
+            <div class="modal-content">
+            <h3>Set Difficulty</h3>
+            <select id="userBombCount" class="bomb-select">
+                <option value="0">0 Bomb</option>
+                <option value="1">1 Bomb</option>
+                <option value="2">2 Bombs</option>
+                <option value="3">3 Bombs</option>
+                <option value="4" selected>4 Bombs</option>
+                <option value="5">5 Bombs</option>
+                <option value="6">6 Bombs</option>
+            </select>
+            <button class="btn btn-start" onclick="startFlow()">PROCEED</button>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="screen">
+            <h2>Mines Active</h2>
+            <div id="gameBoard"></div>
+            <p>Fee: ₹10 | Bombs: <span id="activeBombs">0</span></p>
+        </div>
+
+        <div id="celebrationModal" class="modal">
+            <div class="modal-content" style="border: 2px solid var(--gold);">
+            <h1 style="color:var(--gold); margin:0;">YOU WON!</h1>
+            <p style="font-size: 1.1rem;">Wonderful! You cleared the field.</p>
+            <div style="font-size: 60px; margin: 10px 0;">✨🏆✨</div>
+            <button class="btn btn-gold" onclick="openScratchStep()">GET SCRATCH CARD</button>
+            </div>
+        </div>
+
+        <div id="scratchModal" class="modal">
+            <div class="modal-content">
+            <h3 style="margin-top:0;">SCRATCH CARD</h3>
+            <div id="scratchBox" class="scratch-area" onclick="startScratch()">SCRATCH HERE</div>
+            <div id="revealZone" style="display:none;">
+                <p>Your Prize ID:</p>
+                <h2 id="winCode" style="color:var(--gold); margin: 10px 0;"></h2>
+                <div id="verifyForm" style="display:none; margin-top:20px; border-top: 1px solid #444; padding-top: 15px;">
+                <input type="text" id="inputId" class="verify-input" readonly>
+                <button class="btn btn-start" onclick="verifyPrize()">SUBMIT CLAIM</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div id="successModal" class="modal">
+            <div class="modal-content" style="border: 2px solid var(--green);">
+            <h2 style="color:var(--green);">CLAIMED!</h2>
+            <p>Your reward is now in History.</p>
+            <button class="btn btn-start" onclick="goHome()">AWESOME</button>
+            </div>
+        </div>
+
+        <div id="lossModal" class="modal">
+            <div class="modal-content">
+            <h2 style="color:var(--red);">GAME OVER!</h2>
+            <p>You hit a bomb.</p>
+            <button class="btn btn-start" style="margin-bottom:10px;" onclick="toggleModal('selectModal', true); toggleModal('lossModal', false)">TRY AGAIN</button>
+            <button class="btn btn-how" onclick="goHome()">EXIT</button>
+            </div>
+        </div>
+
+        <div id="howModal" class="modal">
+            <div class="modal-content">
+            <span class="close-btn" onclick="toggleModal('howModal', false)">&times;</span>
+            <h3>How to Play</h3>
+            <p style="text-align: left; font-size: 0.9rem;">
+                1. Pay ₹10 entry fee.<br>
+                2. Tap tiles to reveal safe zones.<br>
+                3. Avoid hidden bombs.<br>
+                4. Win and claim your prize ID!
+            </p>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <div class="nav-item active" onclick="goHome()"><span>🏠</span>Home</div>
+            <div class="nav-item" onclick="window.location.href='/history/'"><span>📜</span>History</div>
+            <div class="nav-item" onclick="window.location.href='/account/'"><span>👤</span>Account</div>
+        </nav>
+
+       <script>
+    let minePositions = [];
+    let revealed = [];
+    let gameActive = false;
+    let bombLimit = 4;
+    let currentWinId = "";
+    let isScratched = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("Game Loaded for: {{ user_name }}");
+    });
+
+    // --- SARVA POPUPS SATHI EKACH ONCLICK LOGIC ---
+    window.onclick = function(event) {
+        const scratchModal = document.getElementById('scratchModal');
+        const celebrationModal = document.getElementById('celebrationModal');
+        const successModal = document.getElementById('successModal');
+        const lossModal = document.getElementById('lossModal');
+        const howModal = document.getElementById('howModal');
+        const selectModal = document.getElementById('selectModal');
+        const logoutBox = document.getElementById('logoutBox');
+
+        // 1. Scratch Modal baher click kela tar (Backend update ani close)
+        if (event.target == scratchModal) {
+            fetch('/api/update-status/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ 
+                    win_id: currentWinId, 
+                    action: 'close', 
+                    scratched: isScratched 
+                })
+            });
+            toggleModal('scratchModal', false);
+            setTimeout(() => { goHome(); }, 100);
+        }
+
+        // 2. Baki sarva Modals baher click kelya-var band honyasathi
+        const otherModals = [celebrationModal, successModal, lossModal, howModal, selectModal];
+        otherModals.forEach(modal => {
+            if (event.target == modal) {
+                const id = modal.id;
+                toggleModal(id, false);
+                if (id === 'celebrationModal' || id === 'successModal') {
+                    setTimeout(() => { goHome(); }, 100);
+                }
+            }
+        });
+
+        // 3. Logout Box baher click kela ki band kara
+        if (!event.target.closest('#game-header')) {
+            if (logoutBox) logoutBox.style.display = 'none';
+        }
+    }
+
+    function toggleModal(id, show) {
+        const modal = document.getElementById(id);
+        const nav = document.querySelector('.nav');
+        const header = document.getElementById('game-header');
+        if (modal) modal.style.display = show ? 'flex' : 'none';
+        if (show) {
+            nav.classList.remove('nav-hidden');
+            header.classList.remove('header-hidden');
+        } else if (!show && gameActive) {
+            nav.classList.add('nav-hidden');
+            header.classList.add('header-hidden');
+        }
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(screenId).classList.add('active-screen');
+        document.querySelector('.nav').classList.remove('nav-hidden');
+        document.getElementById('game-header').classList.remove('header-hidden');
+    }
+
+    function goHome() {
+        gameActive = false;
+        ['lossModal', 'celebrationModal', 'scratchModal', 'successModal', 'selectModal', 'howModal'].forEach(m => toggleModal(m, false));
+        showScreen('homeScreen');
+    }
+
+    function startFlow() {
+        bombLimit = parseInt(document.getElementById('userBombCount').value);
+        toggleModal('selectModal', false);
+        if (confirm("Pay ₹10 to Start?")) { initGame(); }
+    }
+
+    function initGame() {
+        showScreen('gameScreen');
+        document.querySelector('.nav').classList.add('nav-hidden');
+        document.getElementById('game-header').classList.add('header-hidden');
+        document.getElementById('activeBombs').innerText = bombLimit;
+        gameActive = true;
+        revealed = [];
+        minePositions = [];
+        isScratched = false;
+        const board = document.getElementById('gameBoard');
+        board.innerHTML = '';
+        while (minePositions.length < bombLimit) {
+            let r = Math.floor(Math.random() * 25);
+            if (!minePositions.includes(r)) minePositions.push(r);
+        }
+        for (let i = 0; i < 25; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.onclick = () => handleTile(tile, i);
+            board.appendChild(tile);
+        }
+    }
+
+    function handleTile(tile, id) {
+        if (!gameActive || tile.classList.contains('safe')) return;
+        if (minePositions.includes(id)) {
+            tile.classList.add('bomb');
+            tile.innerText = "💣";
+            gameActive = false;
+            document.querySelector('.nav').classList.remove('nav-hidden');
+            document.getElementById('game-header').classList.remove('header-hidden');
+            revealAllMines();
+            setTimeout(() => toggleModal('lossModal', true), 1000);
+        } else {
+            tile.classList.add('safe');
+            tile.innerText = "💎";
+            revealed.push(id);
+            if (revealed.length === (25 - bombLimit)) {
+                gameActive = false;
+                document.querySelector('.nav').classList.remove('nav-hidden');
+                document.getElementById('game-header').classList.remove('header-hidden');
+                handleWin();
+            }
+        }
+    }
+
+    function revealAllMines() {
+        const tiles = document.querySelectorAll('.tile');
+        minePositions.forEach(idx => {
+            tiles[idx].classList.add('bomb');
+            tiles[idx].innerText = "💣";
+        });
+    }
+
+    async function handleWin() {
+        try {
+            const res = await fetch('/api/save-win/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            currentWinId = data.win_id;
+            document.getElementById('winCode').innerText = currentWinId;
+            document.getElementById('inputId').value = currentWinId;
+            toggleModal('celebrationModal', true);
+        } catch (error) {
+            console.error("Error:", error);
+            currentWinId = "WIN-ERROR";
+            toggleModal('celebrationModal', true);
+        }
+    }
+
+    function openScratchStep() {
+        toggleModal('celebrationModal', false);
+        toggleModal('scratchModal', true);
+        document.getElementById('scratchBox').style.display = 'block';
+        document.getElementById('revealZone').style.display = 'none';
+        document.getElementById('verifyForm').style.display = 'none';
+    }
+
+    async function startScratch() {
+        isScratched = true;
+        document.getElementById('scratchBox').style.display = 'none';
+        document.getElementById('revealZone').style.display = 'block';
+        await fetch('/api/update-status/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ win_id: currentWinId, action: 'scratch' })
+        });
+        setTimeout(() => { document.getElementById('verifyForm').style.display = 'block'; }, 2000);
+    }
+
+    async function verifyPrize() {
+        if (document.getElementById('inputId').value === currentWinId) {
+            await fetch('/api/update-status/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ win_id: currentWinId, action: 'submit' })
+            });
+            toggleModal('scratchModal', false);
+            toggleModal('successModal', true);
+        }
+    }
+
+    function toggleLogoutBox() {
+        const box = document.getElementById('logoutBox');
+        box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    async function finalLogout() {
+        if (confirm("Logout karaycha aahe?")) {
+            sessionStorage.clear();
+            window.location.href = "/login";
+        }
+    }
+</script>
+        </body>
+        </html>
