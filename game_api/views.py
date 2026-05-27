@@ -1,4 +1,5 @@
-# game_api/views.py - FULL REPLACEMENT
+# game_api/views.py - CLEAN VERSION (No Duplicates)
+
 import random
 import string
 import json
@@ -12,11 +13,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_http_methods
-from django.conf import settings
 
-from .models import GameReward, Wallet, Transaction, PaymentGatewayLog
-from .utils import PhonePePaymentGateway, NextPayPaymentGateway
+from .models import GameReward, Wallet, Transaction
+
 
 # ========== PAGE VIEWS ==========
 
@@ -39,13 +38,11 @@ def mine_page(request):
 def account_page(request):
     user = request.user
     
-    # Get or create wallet
     wallet, created = Wallet.objects.get_or_create(user=user)
     
     total_wins = GameReward.objects.filter(user=user, status='CLAIMED').count()
     transactions = Transaction.objects.filter(user=user).order_by('-created_at')[:50]
     
-    # Calculate totals
     total_deposit = sum(t.amount for t in transactions if t.transaction_type == 'DEPOSIT' and t.status == 'COMPLETED')
     total_withdraw = sum(t.amount for t in transactions if t.transaction_type == 'WITHDRAW' and t.status == 'COMPLETED')
     
@@ -98,7 +95,6 @@ def signup_api(request):
             )
             user.save()
             
-            # Auto create wallet for new user
             Wallet.objects.create(user=user, balance=0)
             
             return JsonResponse({"status": "success", "message": "Account created successfully!"})
@@ -159,16 +155,16 @@ def update_password_api(request):
             return JsonResponse({"status": "error", "message": str(e)})
 
 
-# ========== PAYMENT GATEWAY - DEPOSIT (PhonePe/NextPay) ==========
+# ========== DEPOSIT SYSTEM (UTR VERIFICATION) ==========
+
+BUSINESS_UPI_ID = "yourbusiness@okhdfcbank"  # CHANGE THIS TO YOUR UPI ID
 
 @login_required
-def initiate_deposit(request):
-    """Step 1: User initiates deposit - Create payment request via Gateway"""
+def get_payment_details(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             amount = float(data.get('amount', 0))
-            gateway = data.get('gateway', 'phonepe')  # 'phonepe' or 'nextpay'
             
             if amount < 10:
                 return JsonResponse({'status': 'error', 'message': 'Minimum deposit is ₹10'})
@@ -176,187 +172,91 @@ def initiate_deposit(request):
             if amount > 50000:
                 return JsonResponse({'status': 'error', 'message': 'Maximum deposit is ₹50,000'})
             
-            # Create transaction record with PENDING status
             transaction = Transaction.objects.create(
                 user=request.user,
                 transaction_type='DEPOSIT',
                 amount=amount,
                 status='PENDING',
-                description=f"Deposit of ₹{amount} via {gateway}"
+                description=f"Deposit of ₹{amount} - Waiting for UTR verification"
             )
             
-            # Call appropriate gateway
-            if gateway == 'phonepe':
-                # Get user phone (you need to add phone field to User model or ask user)
-                user_phone = data.get('phone', '9999999999')
-                
-                result = PhonePePaymentGateway.initiate_payment(
-                    merchant_transaction_id=transaction.transaction_id,
-                    amount=amount,
-                    user_email=request.user.email,
-                    user_phone=user_phone
-                )
-                
-                if result['status'] == 'success':
-                    return JsonResponse({
-                        'status': 'success',
-                        'payment_url': result['payment_url'],
-                        'transaction_id': transaction.transaction_id,
-                        'gateway': 'phonep'
-                    })
-                else:
-                    transaction.status = 'FAILED'
-                    transaction.save()
-                    return JsonResponse({'status': 'error', 'message': result['message']})
-                    
-            elif gateway == 'nextpay':
-                callback_url = request.build_absolute_uri('/payment/callback/')
-                
-                result = NextPayPaymentGateway.initiate_payment(
-                    transaction_id=transaction.transaction_id,
-                    amount=amount,
-                    user_email=request.user.email,
-                    user_name=request.user.username,
-                    callback_url=callback_url
-                )
-                
-                if result['status'] == 'success':
-                    return JsonResponse({
-                        'status': 'success',
-                        'payment_url': result['payment_url'],
-                        'transaction_id': transaction.transaction_id,
-                        'gateway': 'nextpay'
-                    })
-                else:
-                    transaction.status = 'FAILED'
-                    transaction.save()
-                    return JsonResponse({'status': 'error', 'message': result['message']})
-            else:
-                return JsonResponse({'status': 'error', 'message': 'Invalid gateway'})
-                
+            # Generate QR Code URL using Google Charts API
+            upi_id = BUSINESS_UPI_ID
+            qr_content = f"pay?pa={upi_id}&am={amount}&cu=INR&pn=MinesGame"
+            qr_url = f"https://chart.googleapis.com/chart?cht=qr&chl={qr_content}&chs=200x200"
+            
+            return JsonResponse({
+                'status': 'success',
+                'transaction_id': transaction.transaction_id,
+                'amount': amount,
+                'upi_id': upi_id,
+                'qr_code_url': qr_url
+            })
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+@login_required
+def verify_utr_and_update_balance(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            transaction_id = data.get('transaction_id')
+            utr_number = data.get('utr_number', '').strip()
+            amount = float(data.get('amount', 0))
+            
+            if not transaction_id:
+                return JsonResponse({'status': 'error', 'message': 'Transaction ID required'})
+            
+            if not utr_number:
+                return JsonResponse({'status': 'error', 'message': 'UTR Number is required'})
+            
+            if len(utr_number) < 8:
+                return JsonResponse({'status': 'error', 'message': 'Please enter valid UTR number'})
+            
+            transaction = Transaction.objects.get(
+                transaction_id=transaction_id,
+                user=request.user,
+                transaction_type='DEPOSIT',
+                status='PENDING'
+            )
+            
+            if float(transaction.amount) != amount:
+                return JsonResponse({'status': 'error', 'message': 'Amount mismatch!'})
+            
+            existing_utr = Transaction.objects.filter(utr_number=utr_number).exclude(id=transaction.id)
+            if existing_utr.exists():
+                return JsonResponse({'status': 'error', 'message': 'This UTR number has already been used!'})
+            
+            # INSTANT BALANCE UPDATE
+            wallet, created = Wallet.objects.get_or_create(user=request.user)
+            wallet.add_balance(transaction.amount)
+            
+            transaction.utr_number = utr_number
+            transaction.status = 'COMPLETED'
+            transaction.approved_at = datetime.now()
+            transaction.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'✅ Payment verified! ₹{transaction.amount} added to your wallet.',
+                'new_balance': float(wallet.balance)
+            })
+            
+        except Transaction.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Transaction not found'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
-@csrf_exempt
-def payment_callback(request):
-    """Gateway redirects user back to website after payment"""
-    transaction_id = request.GET.get('order_id') or request.GET.get('transaction_id')
-    trans_id = request.GET.get('trans_id')  # For NextPay
-    
-    if not transaction_id:
-        return redirect('/payment/failed/')
-    
-    try:
-        transaction = Transaction.objects.get(transaction_id=transaction_id)
-        
-        # Check status from gateway
-        if trans_id:  # NextPay callback
-            result = NextPayPaymentGateway.verify_payment(
-                trans_id=trans_id,
-                amount=float(transaction.amount),
-                order_id=transaction_id
-            )
-            
-            if result['status'] == 'SUCCESS':
-                # Update wallet
-                wallet, created = Wallet.objects.get_or_create(user=transaction.user)
-                wallet.add_balance(transaction.amount)
-                
-                transaction.status = 'COMPLETED'
-                transaction.save()
-                
-                return redirect(f'/payment/success/?amount={transaction.amount}')
-            else:
-                transaction.status = 'FAILED'
-                transaction.save()
-                return redirect('/payment/failed/')
-                
-        else:  # PhonePe callback
-            result = PhonePePaymentGateway.check_payment_status(transaction_id)
-            
-            if result['status'] == 'SUCCESS':
-                wallet, created = Wallet.objects.get_or_create(user=transaction.user)
-                wallet.add_balance(transaction.amount)
-                
-                transaction.status = 'COMPLETED'
-                transaction.save()
-                
-                return redirect(f'/payment/success/?amount={transaction.amount}')
-            else:
-                transaction.status = 'FAILED'
-                transaction.save()
-                return redirect('/payment/failed/')
-                
-    except Transaction.DoesNotExist:
-        return redirect('/payment/failed/')
-    except Exception as e:
-        print(f"Callback error: {e}")
-        return redirect('/payment/failed/')
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def payment_webhook(request):
-    """Gateway webhook for automatic balance update (Background)"""
-    try:
-        # Get payload
-        payload = json.loads(request.body)
-        
-        transaction_id = payload.get('order_id') or payload.get('merchantTransactionId')
-        gateway_status = payload.get('status') or payload.get('code')
-        
-        if not transaction_id:
-            return JsonResponse({'status': 'error', 'message': 'No transaction ID'})
-        
-        transaction = Transaction.objects.get(transaction_id=transaction_id)
-        
-        # Check if already processed
-        if transaction.status == 'COMPLETED':
-            return JsonResponse({'status': 'success', 'message': 'Already processed'})
-        
-        # Determine success
-        is_success = False
-        if gateway_status == 'SUCCESS' or gateway_status == 0 or gateway_status == -1:
-            is_success = True
-        
-        if is_success:
-            # Add balance to wallet
-            wallet, created = Wallet.objects.get_or_create(user=transaction.user)
-            wallet.add_balance(transaction.amount)
-            
-            transaction.status = 'COMPLETED'
-            transaction.save()
-            
-            # Save webhook log
-            PaymentGatewayLog.objects.create(
-                transaction=transaction,
-                gateway_transaction_id=payload.get('trans_id', ''),
-                gateway_response=json.dumps(payload),
-                request_data=json.dumps(payload),
-                status='COMPLETED'
-            )
-            
-            return JsonResponse({'status': 'success', 'message': 'Balance updated'})
-        else:
-            transaction.status = 'FAILED'
-            transaction.save()
-            return JsonResponse({'status': 'success', 'message': 'Payment failed'})
-        
-    except Transaction.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Transaction not found'}, status=404)
-    except Exception as e:
-        print(f"Webhook error: {e}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-
-# ========== WITHDRAWAL SYSTEM (With Admin Panel) ==========
+# ========== WITHDRAWAL SYSTEM ==========
 
 @login_required
-def withdraw_money(request):
-    """Withdraw request - IMMEDIATE BALANCE DEDUCTION + Admin approval"""
+def request_withdrawal(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -374,10 +274,8 @@ def withdraw_money(request):
             if wallet.balance < amount:
                 return JsonResponse({'status': 'error', 'message': 'Insufficient balance!'})
             
-            # IMMEDIATELY DEDUCT from wallet (Hold funds)
             wallet.deduct_balance(amount)
             
-            # Create withdrawal transaction with PENDING status
             transaction = Transaction.objects.create(
                 user=request.user,
                 transaction_type='WITHDRAW',
@@ -389,7 +287,7 @@ def withdraw_money(request):
             
             return JsonResponse({
                 'status': 'success',
-                'message': f'Withdrawal request of ₹{amount} submitted for approval! Funds are on hold.',
+                'message': f'Withdrawal request submitted! Funds are on hold. Admin will process soon.',
                 'transaction_id': transaction.transaction_id,
                 'new_balance': float(wallet.balance)
             })
@@ -400,26 +298,24 @@ def withdraw_money(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
 
+# ========== ADMIN PANEL ==========
+
 @staff_member_required
 def admin_withdrawals_panel(request):
-    """Admin panel to manage withdrawal requests"""
-    # Get all PENDING withdrawal requests
     pending_withdrawals = Transaction.objects.filter(
         transaction_type='WITHDRAW',
         status='PENDING'
     ).order_by('-created_at')
     
-    # Get completed withdrawals for history
     completed_withdrawals = Transaction.objects.filter(
         transaction_type='WITHDRAW',
         status='COMPLETED'
     ).order_by('-approved_at')[:50]
     
-    # Get rejected withdrawals
     rejected_withdrawals = Transaction.objects.filter(
         transaction_type='WITHDRAW',
         status='FAILED'
-    ).order_by('-updated_at')[:50]
+    ).order_by('-approved_at')[:50]
     
     context = {
         'pending_withdrawals': pending_withdrawals,
@@ -432,10 +328,8 @@ def admin_withdrawals_panel(request):
     
     return render(request, 'admin_withdrawals.html', context)
 
-
 @staff_member_required
 def admin_approve_withdrawal(request, transaction_id):
-    """Approve withdrawal request (After MANUAL payment by admin)"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -446,29 +340,24 @@ def admin_approve_withdrawal(request, transaction_id):
                 status='PENDING'
             )
             
-            # Update transaction status
             transaction.status = 'COMPLETED'
             transaction.approved_by = request.user
             transaction.approved_at = datetime.now()
-            transaction.notes = data.get('notes', 'Withdrawal approved - Payment sent manually')
+            transaction.notes = data.get('notes', 'Payment sent manually')
             transaction.save()
             
             return JsonResponse({
                 'status': 'success',
-                'message': f'Withdrawal #{transaction_id} approved successfully'
+                'message': f'Withdrawal #{transaction_id} approved'
             })
             
         except Transaction.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Transaction not found'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
-
 @staff_member_required
 def admin_reject_withdrawal(request, transaction_id):
-    """Reject withdrawal and REVERSE funds back to wallet"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -479,26 +368,22 @@ def admin_reject_withdrawal(request, transaction_id):
                 status='PENDING'
             )
             
-            # REVERSE funds (add back to wallet)
             wallet = Wallet.objects.get(user=transaction.user)
             wallet.add_balance(transaction.amount)
             
-            # Update transaction
             transaction.status = 'FAILED'
             transaction.approved_by = request.user
             transaction.approved_at = datetime.now()
-            transaction.rejection_reason = data.get('reason', 'Withdrawal rejected by admin')
+            transaction.rejection_reason = data.get('reason', 'Rejected by admin')
             transaction.save()
             
             return JsonResponse({
                 'status': 'success',
-                'message': f'Withdrawal #{transaction_id} rejected. Funds reversed to user wallet.'
+                'message': f'Withdrawal rejected. ₹{transaction.amount} refunded.'
             })
             
         except Transaction.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Transaction not found'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
@@ -507,7 +392,6 @@ def admin_reject_withdrawal(request, transaction_id):
 
 @login_required
 def process_game_fee(request):
-    """Game start karne se pehle ₹10 deduct"""
     if request.method == 'POST':
         wallet, created = Wallet.objects.get_or_create(user=request.user)
         
@@ -534,19 +418,16 @@ def process_game_fee(request):
     
     return JsonResponse({'status': 'error'})
 
-
 @login_required
 def save_win_api(request):
     if request.method == "POST":
         user = request.user
         user_uid = user.last_name
         
-        # Generate unique win_id
         prefix = str(user_uid)[:4].upper()
         suffix = ''.join(random.choices(string.digits, k=6))
         new_id = f"{prefix}-{suffix}"
         
-        # Ensure unique
         while GameReward.objects.filter(win_id=new_id).exists():
             suffix = ''.join(random.choices(string.digits, k=6))
             new_id = f"{prefix}-{suffix}"
@@ -559,10 +440,8 @@ def save_win_api(request):
         return JsonResponse({"status": "success", "win_id": new_id})
     return JsonResponse({"status": "error"})
 
-
 @login_required
 def add_win_reward(request, win_id):
-    """Win claim karne par ₹50 reward"""
     try:
         reward = GameReward.objects.get(win_id=win_id, user=request.user)
         
@@ -593,7 +472,6 @@ def add_win_reward(request, win_id):
     except GameReward.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Invalid win ID'})
 
-
 @login_required
 def update_status_api(request):
     if request.method == "POST":
@@ -614,13 +492,9 @@ def update_status_api(request):
     
     return JsonResponse({"status": "error"})
 
-
 def payment_success(request):
-    """Payment success page"""
     amount = request.GET.get('amount', 0)
     return render(request, 'payment_success.html', {'amount': amount})
 
-
 def payment_failed(request):
-    """Payment failed page"""
     return render(request, 'payment_failed.html')

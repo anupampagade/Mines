@@ -227,7 +227,478 @@
             <div class="nav-item active" onclick="goHome()"><span>🏠</span>Home</div>
             <div class="nav-item" onclick="window.location.href='/history/'"><span>📜</span>History</div>
             <div class="nav-item" onclick="window.location.href='/account/'"><span>👤</span>Account</div>
-        </nav>
+        </nav><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mines Rewards Pro</title>
+<!-- Lightweight Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+    :root {
+        --bg: #0a0a0a; --card: #141414; --accent: #00e5ff; --gold: #ffd700;
+        --green: #00e676; --red: #ff1744; --text: #ffffff; --glass: rgba(20, 20, 20, 0.8);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+
+    /* Premium Glass Header */
+    #game-header {
+        background: var(--glass); backdrop-filter: blur(12px); padding: 15px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--gold);
+        position: sticky; top: 0; z-index: 100;
+    }
+    .header-hidden, .nav-hidden { display: none !important; }
+
+    /* Screens & Modals */
+    .screen { display: none; padding: 20px; text-align: center; min-height: 100vh; }
+    .active-screen { display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+        display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-content {
+        background: var(--card); padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; 
+        text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 14px 30px; border-radius: 12px; border: none; 
+        font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; 
+        transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-start { background: var(--green); color: #000; box-shadow: 0 0 15px rgba(0, 230, 118, 0.3); }
+    .btn-cashout { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); animation: pulse 1.5s infinite; }
+    .btn-how { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    
+    @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } 50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); } 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } }
+
+    /* Game Stats Bar */
+    .stats-bar { display: flex; justify-content: space-between; width: 100%; max-width: 320px; margin-bottom: 15px; font-size: 0.9rem; color: #aaa; }
+    .stats-bar span b { color: var(--text); font-size: 1.1rem; }
+
+    /* 3D Game Board */
+    #gameBoard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 320px; width: 100%; perspective: 1000px; }
+    .tile-container { aspect-ratio: 1/1; cursor: pointer; }
+    .tile-inner {
+        position: relative; width: 100%; height: 100%; text-align: center;
+        transition: transform 0.6s; transform-style: preserve-3d;
+    }
+    .tile-container.flipped .tile-inner { transform: rotateY(180deg); }
+    .tile-front, .tile-back {
+        position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+        border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        font-size: 24px; font-weight: bold;
+    }
+    .tile-front { background: linear-gradient(145deg, #222, #1a1a1a); border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .tile-front:active { background: #333; }
+    .tile-back { background: var(--green); color: #000; transform: rotateY(180deg); box-shadow: 0 0 15px rgba(0, 230, 118, 0.4); }
+    .tile-back.bomb { background: var(--red); color: #fff; box-shadow: 0 0 20px rgba(255, 23, 68, 0.6); animation: shake 0.5s; }
+    
+    @keyframes shake { 0%, 100% { transform: rotateY(180deg) translateX(0); } 25% { transform: rotateY(180deg) translateX(-5px); } 75% { transform: rotateY(180deg) translateX(5px); } }
+
+    /* Scratch Card Canvas */
+    #scratchCanvas { border-radius: 10px; cursor: crosshair; touch-action: none; }
+
+    /* Nav */
+    .nav { position: fixed; bottom: 0; width: 100%; background: var(--glass); backdrop-filter: blur(12px); display: flex; height: 65px; border-top: 1px solid rgba(255,255,255,0.1); z-index: 2000; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 11px; color: #666; transition: 0.2s; }
+    .nav-item.active, .nav-item:active { color: var(--accent); }
+
+    /* Custom Select & Input */
+    .custom-select, .custom-input {
+        width: 100%; padding: 12px; margin: 10px 0; background: #111; color: var(--text); 
+        border: 1px solid #333; border-radius: 8px; font-size: 1rem; outline: none;
+    }
+    .custom-select:focus, .custom-input:focus { border-color: var(--accent); }
+
+    /* Logout */
+    .mini-logout-box { position: absolute; top: 35px; right: 0; background: #222; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; display: none; z-index: 3000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .logout-content { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); font-size: 14px; }
+    .logout-content:hover { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div id="game-header">
+    <span>🆔 <b>{{ user_id }}</b></span>
+    <div style="position: relative;">
+        <span onclick="toggleLogoutBox()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            👤 <b>{{ user_name }}</b> ▼
+        </span>
+        <div id="logoutBox" class="mini-logout-box">
+            <div class="logout-content" onclick="finalLogout()">
+                <img src="https://cdn-icons-png.flaticon.com/512/182/182448.png" width="16" style="filter: invert(1);">
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="screen active-screen">
+    <div style="margin-top: 100px; font-size: 60px; filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.5));">💎</div>
+    <h1 style="margin: 10px 0; letter-spacing: 2px;">MINES PRO</h1>
+    <p style="color: #888; max-width: 250px;">Test your luck. Cash out before you hit the mine.</p>
+    
+    <div style="width: 100%; max-width: 300px; margin-top: 40px; text-align: left;">
+        <label style="font-size: 0.8rem; color: #888;">BET AMOUNT (₹)</label>
+        <input type="number" id="betAmount" class="custom-input" value="10" min="10" step="10">
+        
+        <label style="font-size: 0.8rem; color: #888;">MINES COUNT</label>
+        <select id="userBombCount" class="custom-select">
+            <option value="1">1 Mine (Low Risk)</option>
+            <option value="3">3 Mines (Medium)</option>
+            <option value="5" selected>5 Mines (High Risk)</option>
+            <option value="10">10 Mines (Insane)</option>
+            <option value="24">24 Mines (Max 250x)</option>
+        </select>
+
+        <button class="btn btn-start" style="margin-top: 20px;" onclick="startFlow()">PLACE BET & START</button>
+        <button class="btn btn-how" style="margin-top: 10px;" onclick="toggleModal('howModal', true)">HOW TO PLAY</button>
+    </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="screen">
+    <div class="stats-bar">
+        <span>Bet: ₹<b id="currentBet">10</b></span>
+        <span>Mines: <b id="activeBombs" style="color: var(--red);">5</b></span>
+        <span>Multiplier: <b id="currentMultiplier" style="color: var(--green);">1.00x</b></span>
+    </div>
+    
+    <div id="gameBoard"></div>
+    
+    <button id="cashoutBtn" class="btn btn-cashout" style="margin-top: 25px; max-width: 320px; display: none;" onclick="playerCashout()">
+        CASHOUT ₹<span id="cashoutAmount">0.00</span>
+    </button>
+</div>
+
+<!-- MODALS -->
+<div id="winModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color: var(--gold); margin: 0;">CASHED OUT!</h2>
+        <p>You won</p>
+        <h1 id="winAmount" style="color: var(--green); margin: 10px 0;">₹0.00</h1>
+        <button class="btn btn-start" onclick="openScratchStep()">CLAIM REWARD</button>
+    </div>
+</div>
+
+<div id="scratchModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0;">Scratch to Reveal Prize ID</h3>
+        <div style="position: relative; width: 280px; height: 120px; margin: 0 auto;">
+            <div id="prizeText" style="position: absolute; top:0; left:0; width:100%; height:100%; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--gold); font-weight: bold; z-index: 1;"></div>
+            <canvas id="scratchCanvas" width="280" height="120" style="position: absolute; top:0; left:0; z-index: 2;"></canvas>
+        </div>
+        <button id="claimBtn" class="btn btn-start" style="margin-top: 20px; display: none;" onclick="verifyPrize()">SUBMIT TO WALLET</button>
+    </div>
+</div>
+
+<div id="lossModal" class="modal">
+    <div class="modal-content" style="border-color: var(--red);">
+        <div style="font-size: 50px; margin-bottom: 10px;">💥</div>
+        <h2 style="color: var(--red); margin: 0;">BOOM!</h2>
+        <p style="color: #aaa;">You hit a mine and lost ₹<span id="lostAmount">10</span></p>
+        <button class="btn btn-start" style="margin-top: 20px;" onclick="goHome()">TRY AGAIN</button>
+    </div>
+</div>
+
+<div id="howModal" class="modal">
+    <div class="modal-content" style="text-align: left;">
+        <h3 style="text-align: center; color: var(--accent);">How To Play</h3>
+        <ul style="line-height: 1.8; color: #ccc; font-size: 0.9rem; padding-left: 20px;">
+            <li>Choose your bet amount and number of mines.</li>
+            <li>Tap the tiles to reveal safe spots (Diamonds 💎).</li>
+            <li>Every safe tap increases your <b style="color:var(--green)">Multiplier</b>.</li>
+            <li>Hit <b style="color:var(--gold)">CASHOUT</b> anytime to lock in your profit.</li>
+            <li>Hit a Mine 💣, and you lose your bet!</li>
+        </ul>
+        <button class="btn btn-how" style="margin-top: 15px;" onclick="toggleModal('howModal', false)">GOT IT</button>
+    </div>
+</div>
+
+<nav class="nav">
+    <div class="nav-item active" onclick="goHome()"><span>🏠</span>Home</div>
+    <div class="nav-item" onclick="window.location.href='/history/'"><span>📜</span>History</div>
+    <div class="nav-item" onclick="window.location.href='/account/'"><span>👤</span>Account</div>
+</nav>
+
+<script>
+    // --- STATE ---
+    let minePositions = [];
+    let safeClicked = 0;
+    let gameActive = false;
+    let bombLimit = 5;
+    let betAmount = 10;
+    let currentWinId = "";
+    let baseMultiplier = 0.97;
+
+    // Audio Context for sound effects
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, duration, type="sine", vol=0.1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function toggleModal(id, show) {
+        document.getElementById(id).style.display = show ? 'flex' : 'none';
+        if (show && gameActive) {
+            document.querySelector('.nav').classList.add('nav-hidden');
+            document.getElementById('game-header').classList.add('header-hidden');
+        } else {
+            document.querySelector('.nav').classList.remove('nav-hidden');
+            document.getElementById('game-header').classList.remove('header-hidden');
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(id).classList.add('active-screen');
+    }
+
+    function goHome() {
+        gameActive = false;
+        ['lossModal', 'winModal', 'scratchModal', 'howModal'].forEach(m => toggleModal(m, false));
+        showScreen('homeScreen');
+    }
+
+    function startFlow() {
+        betAmount = parseInt(document.getElementById('betAmount').value) || 10;
+        bombLimit = parseInt(document.getElementById('userBombCount').value);
+        
+        // You would integrate a real wallet deduction API here
+        // if (!confirm(`Deduct ₹${betAmount} from wallet?`)) return; 
+        
+        initGame();
+    }
+
+    function getMultiplier() {
+        // Algorithm to calculate multiplier based on safe clicks vs total mines
+        const safeTiles = 25 - bombLimit;
+        const progress = safeClicked / safeTiles;
+        // Exponential growth curve
+        return (baseMultiplier * Math.pow((25 / (25 - safeClicked)), safeClicked)).toFixed(2);
+    }
+
+    function updateUI() {
+        const mult = getMultiplier();
+        document.getElementById('currentMultiplier').innerText = mult + 'x';
+        document.getElementById('cashoutAmount').innerText = (betAmount * mult).toFixed(2);
+        
+        if(safeClicked > 0) {
+            document.getElementById('cashoutBtn').style.display = 'block';
+        }
+    }
+
+    function initGame() {
+        showScreen('gameScreen');
+        document.querySelector('.nav').classList.add('nav-hidden');
+        document.getElementById('game-header').classList.add('header-hidden');
+        
+        document.getElementById('currentBet').innerText = betAmount;
+        document.getElementById('activeBombs').innerText = bombLimit;
+        document.getElementById('cashoutBtn').style.display = 'none';
+        
+        gameActive = true;
+        safeClicked = 0;
+        minePositions = [];
+        
+        const board = document.getElementById('gameBoard');
+        board.innerHTML = '';
+        
+        while (minePositions.length < bombLimit) {
+            let r = Math.floor(Math.random() * 25);
+            if (!minePositions.includes(r)) minePositions.push(r);
+        }
+        
+        for (let i = 0; i < 25; i++) {
+            const container = document.createElement('div');
+            container.className = 'tile-container';
+            container.innerHTML = `
+                <div class="tile-inner">
+                    <div class="tile-front"></div>
+                    <div class="tile-back" id="tile-${i}"></div>
+                </div>
+            `;
+            container.onclick = () => handleTile(container, i);
+            board.appendChild(container);
+        }
+        updateUI();
+    }
+
+    function handleTile(container, id) {
+        if (!gameActive || container.classList.contains('flipped')) return;
+        
+        // Resume audio context on first click (Mobile browser requirement)
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        container.classList.add('flipped');
+        
+        if (minePositions.includes(id)) {
+            // HIT BOMB
+            const back = document.getElementById(`tile-${id}`);
+            back.classList.add('bomb');
+            back.innerText = '💣';
+            
+            playTone(100, 0.5, 'sawtooth', 0.3); // Deep explosion sound
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]); // Vibration pattern
+            
+            gameActive = false;
+            document.getElementById('lostAmount').innerText = betAmount;
+            
+            // Reveal other mines after a short delay
+            setTimeout(() => {
+                for(let m of minePositions) {
+                    if(m !== id) {
+                        let el = document.getElementById(`tile-${m}`).parentElement;
+                        el.classList.add('flipped');
+                        document.getElementById(`tile-${m}`).classList.add('bomb');
+                        document.getElementById(`tile-${m}`).innerText = '💣';
+                    }
+                }
+                setTimeout(() => toggleModal('lossModal', true), 800);
+            }, 500);
+
+        } else {
+            // SAFE
+            document.getElementById(`tile-${id}`).innerText = '💎';
+            safeClicked++;
+            
+            playTone(600 + (safeClicked * 50), 0.1, 'sine', 0.1); // Rising pitch
+            if(navigator.vibrate) navigator.vibrate(30); // Light tap
+            
+            updateUI();
+        }
+    }
+
+    function playerCashout() {
+        if (!gameActive || safeClicked === 0) return;
+        gameActive = false;
+        
+        const mult = getMultiplier();
+        const winAmount = (betAmount * mult).toFixed(2);
+        
+        playTone(800, 0.1); playTone(1000, 0.1); playTone(1200, 0.2); // Victory tune
+        
+        document.getElementById('winAmount').innerText = `₹${winAmount}`;
+        toggleModal('winModal', true);
+        
+        // Trigger confetti
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffd700', '#00e5ff'] });
+    }
+
+    // --- SCRATCH CARD LOGIC ---
+    function openScratchStep() {
+        toggleModal('winModal', false);
+        toggleModal('scratchModal', true);
+        document.getElementById('claimBtn').style.display = 'none';
+        initScratchCard();
+    }
+
+    function initScratchCard() {
+        // Generate dummy ID for frontend demo (Replace with API call in production)
+        currentWinId = "WIN-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+        document.getElementById('prizeText').innerText = currentWinId;
+
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw metallic scratch surface
+        const gradient = ctx.createLinearGradient(0, 0, 280, 120);
+        gradient.addColorStop(0, '#bfbfbf');
+        gradient.addColorStop(0.5, '#e6e6e6');
+        gradient.addColorStop(1, '#bfbfbf');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 280, 120);
+        
+        ctx.fillStyle = '#555';
+        ctx.font = 'bold 20px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('SCRATCH HERE', 140, 65);
+
+        let isDrawing = false;
+        let scratchedPixels = 0;
+        const totalPixels = 280 * 120;
+
+        function scratch(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            scratchedPixels += Math.PI * 15 * 15; // Approximation
+            
+            // Auto-reveal if 50% is scratched
+            if (scratchedPixels > totalPixels * 0.5) {
+                clearScratch();
+            }
+        }
+
+        function clearScratch() {
+            ctx.clearRect(0, 0, 280, 120);
+            canvas.style.pointerEvents = 'none';
+            document.getElementById('claimBtn').style.display = 'block';
+            playTone(500, 0.1); playTone(700, 0.2); // Reveal sound
+        }
+
+        // Event Listeners for Mouse & Touch
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', (e) => { if(isDrawing) scratch(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; const rect = canvas.getBoundingClientRect(); scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(isDrawing) { const rect = canvas.getBoundingClientRect(); scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); }});
+        canvas.addEventListener('touchend', () => isDrawing = false);
+    }
+
+    async function verifyPrize() {
+        // In production, call backend: await fetch('/api/save-win/', ...)
+        toggleModal('scratchModal', false);
+        confetti({ particleCount: 300, spread: 100, origin: { y: 0.5 } });
+        goHome();
+    }
+
+    function toggleLogoutBox() {
+        const box = document.getElementById('logoutBox');
+        box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    async function finalLogout() {
+        if (confirm("Logout karaycha aahe?")) {
+            sessionStorage.clear();
+            window.location.href = "/login";
+        }
+    }
+
+    // Close modals on outside click
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            if(!gameActive) goHome();
+        }
+        if (!event.target.closest('#game-header')) {
+            document.getElementById('logoutBox').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
 
        <script>
     let minePositions = [];

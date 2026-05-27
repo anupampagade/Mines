@@ -18,24 +18,22 @@ urlpatterns = [
     path('api/check-email/', views.check_email_api, name='check_email'),
     path('api/update-password/', views.update_password_api, name='update_password'),
     
-    # Payment Gateway APIs (Deposit)
-    path('api/deposit/initiate/', views.initiate_deposit, name='initiate_deposit'),
-    path('payment/callback/', views.payment_callback, name='payment_callback'),
-    path('payment/webhook/', views.payment_webhook, name='payment_webhook'),
-    path('payment/success/', views.payment_success, name='payment_success'),
-    path('payment/failed/', views.payment_failed, name='payment_failed'),
+    path('api/get-payment-details/', views.get_payment_details),
+    path('api/verify-utr/', views.verify_utr_and_update_balance),
     
-    # Withdrawal APIs (User)
-    path('api/withdraw/', views.withdraw_money, name='withdraw'),
+    # Withdrawal APIs
+    path('api/request-withdrawal/', views.request_withdrawal),
     
-    # Admin Withdrawal Panel
-    path('admin/withdrawals/', views.admin_withdrawals_panel, name='admin_withdrawals'),
-    path('admin/withdrawals/<str:transaction_id>/approve/', views.admin_approve_withdrawal, name='admin_approve'),
-    path('admin/withdrawals/<str:transaction_id>/reject/', views.admin_reject_withdrawal, name='admin_reject'),
+    # Admin APIs
+    path('admin/withdrawals/', views.admin_withdrawals_panel),
+    path('admin/withdrawals/<str:transaction_id>/approve/', views.admin_approve_withdrawal),
+    path('admin/withdrawals/<str:transaction_id>/reject/', views.admin_reject_withdrawal),
     
-    # Game APIs
-    path('api/process-game-fee/', views.process_game_fee, name='process_game_fee'),
-    path('api/save-win/', views.save_win_api, name='save_win'),
-    path('api/add-win-reward/<str:win_id>/', views.add_win_reward, name='add_win_reward'),
-    path('api/update-status/', views.update_status_api, name='update_status'),
+    # Game APIs (existing)
+    path('api/process-game-fee/', views.process_game_fee),
+    path('api/save-win/', views.save_win_api),
+    path('api/add-win-reward/<str:win_id>/', views.add_win_reward),
+    path('api/update-status/', views.update_status_api),
+    
+
 ]

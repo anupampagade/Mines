@@ -148,10 +148,5 @@ NEXTPAY_CALLBACK_URL = 'https://yourdomain.com/payment/callback/'  # Your domain
 NEXTPAY_WEBHOOK_SECRET = 'your_webhook_secret_here'  # For signature verification
 
 # For PhonePe integration (if using direct PhonePe)
-PHONEPE_MERCHANT_ID = 'your_merchant_id'
-PHONEPE_SALT_KEY = 'your_salt_key'
-PHONEPE_SALT_INDEX = 1
-PHONEPE_API_URL = 'https://api.phonepe.com/apis/hermes/pg/v1/pay'
-PHONEPE_STATUS_URL = 'https://api.phonepe.com/apis/hermes/pg/v1/status'
-PHONEPE_REDIRECT_URL = 'https://yourdomain.com/payment/phonepe-callback/'
-PHONEPE_SANDBOX = True  # True for UAT testing
+# settings.py - Add your business UPI ID
+BUSINESS_UPI_ID = "yourbusiness@okhdfcbank"  # <--- APNA UPI ID DALO

@@ -54,6 +54,10 @@ class Wallet(models.Model):
 
 
 # ========== TRANSACTION MODEL ==========
+# In game_api/models.py, find the Transaction model and REMOVE this line:
+# payment_screenshot = models.ImageField(upload_to='payment_proofs/', null=True, blank=True)
+
+# Your Transaction model should look like this (without payment_screenshot):
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
         ('DEPOSIT', 'Deposit'),
@@ -76,19 +80,9 @@ class Transaction(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    def save(self, *args, **kwargs):
-        if not self.transaction_id:
-            # Transaction ID generate karo
-            prefix = self.transaction_type[:3].upper()
-            suffix = ''.join(random.choices(string.digits + string.ascii_uppercase, k=10))
-            self.transaction_id = f"{prefix}-{suffix}"
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return f"{self.transaction_id} - {self.transaction_type} - ₹{self.amount}"
-    
-
+    # Keep only these fields (remove payment_screenshot)
     upi_id = models.CharField(max_length=100, blank=True, null=True)
+    utr_number = models.CharField(max_length=100, blank=True, null=True)  # IMPORTANT: Add this
     bank_account = models.CharField(max_length=50, blank=True, null=True)
     ifsc_code = models.CharField(max_length=20, blank=True, null=True)
     account_holder = models.CharField(max_length=100, blank=True, null=True)
@@ -96,9 +90,15 @@ class Transaction(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, null=True)
     
+    def save(self, *args, **kwargs):
+        if not self.transaction_id:
+            prefix = self.transaction_type[:3].upper()
+            suffix = ''.join(random.choices(string.digits + string.ascii_uppercase, k=10))
+            self.transaction_id = f"{prefix}-{suffix}"
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.transaction_id} - {self.transaction_type} - ₹{self.amount} - {self.status}"
-
 
 class PaymentGatewayLog(models.Model):
     transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, null=True, blank=True)

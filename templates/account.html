@@ -9,9 +9,16 @@
             --gold: #d4af37;
             --bg: #121212;
             --card: #1e1e1e;
+            --card-light: #2a2a2a;
             --green: #4caf50;
             --red: #f44336;
             --text: #f5f5f5;
+            --text-muted: #888;
+            --border: #333;
+            --phonepe: #5f259f;
+            --googlepay: #4285f4;
+            --paytm: #00baf2;
+            --bhim: #e64a19;
         }
 
         * {
@@ -23,17 +30,18 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
             padding-bottom: 80px;
         }
 
+        /* Header */
         .account-header {
             background: #1a1a1a;
             padding: 15px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -61,33 +69,21 @@
             color: var(--gold);
         }
 
+        /* Profile Card */
         .profile-card {
             background: var(--card);
             margin: 20px;
             padding: 25px;
             border-radius: 20px;
             text-align: center;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
 
-        .avatar {
-            font-size: 80px;
-            margin-bottom: 10px;
-        }
+        .avatar { font-size: 80px; margin-bottom: 10px; }
+        .username { font-size: 24px; font-weight: bold; color: var(--gold); margin-bottom: 5px; }
+        .user-id { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
 
-        .username {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-
-        .user-id {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 15px;
-        }
-
+        /* Wallet Card */
         .wallet-card {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             margin: 20px;
@@ -97,18 +93,8 @@
             text-align: center;
         }
 
-        .wallet-label {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 5px;
-        }
-
-        .wallet-balance {
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--gold);
-            margin: 10px 0;
-        }
+        .wallet-label { font-size: 14px; color: #aaa; margin-bottom: 5px; }
+        .wallet-balance { font-size: 42px; font-weight: bold; color: var(--gold); margin: 10px 0; }
 
         .wallet-buttons {
             display: flex;
@@ -127,24 +113,12 @@
             transition: 0.3s;
         }
 
-        .btn-deposit {
-            background: var(--green);
-            color: white;
-        }
+        .btn-deposit { background: var(--green); color: white; }
+        .btn-deposit:hover { background: #45a049; }
+        .btn-withdraw { background: var(--red); color: white; }
+        .btn-withdraw:hover { background: #d32f2f; }
 
-        .btn-deposit:hover {
-            background: #45a049;
-        }
-
-        .btn-withdraw {
-            background: var(--red);
-            color: white;
-        }
-
-        .btn-withdraw:hover {
-            background: #d32f2f;
-        }
-
+        /* Stats */
         .stats-row {
             display: flex;
             gap: 15px;
@@ -157,21 +131,13 @@
             padding: 15px;
             border-radius: 12px;
             text-align: center;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
 
-        .stat-mini-label {
-            font-size: 12px;
-            color: #aaa;
-        }
+        .stat-mini-label { font-size: 12px; color: var(--text-muted); }
+        .stat-mini-value { font-size: 18px; font-weight: bold; color: var(--gold); margin-top: 5px; }
 
-        .stat-mini-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--gold);
-            margin-top: 5px;
-        }
-
+        /* Info Grid */
         .info-grid {
             display: flex;
             flex-direction: column;
@@ -189,65 +155,27 @@
             align-items: center;
         }
 
-        .info-label {
-            font-size: 14px;
-            color: #aaa;
-        }
+        .info-label { font-size: 14px; color: var(--text-muted); }
+        .info-value { font-size: 16px; font-weight: bold; color: var(--gold); }
 
-        .info-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--gold);
-        }
-
-        .stats-section {
-            margin: 20px;
-        }
-
-        .stats-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: var(--gold);
-            text-align: center;
-        }
-
-        .stats-grid {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
+        /* Game Stats */
+        .stats-section { margin: 20px; }
+        .stats-title { font-size: 18px; margin-bottom: 15px; color: var(--gold); text-align: center; }
+        .stats-grid { display: flex; gap: 15px; justify-content: center; }
         .stat-box {
             background: var(--card);
             padding: 20px;
             border-radius: 12px;
             text-align: center;
             flex: 1;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
+        .stat-number { font-size: 28px; font-weight: bold; color: var(--green); }
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
 
-        .stat-number {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--green);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 5px;
-        }
-
-        .transactions-section {
-            margin: 20px;
-        }
-
-        .transactions-title {
-            font-size: 16px;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
+        /* Transactions */
+        .transactions-section { margin: 20px; }
+        .transactions-title { font-size: 16px; color: var(--gold); margin-bottom: 15px; }
         .transaction-item {
             background: var(--card);
             padding: 12px;
@@ -257,56 +185,23 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        .transaction-left {
-            flex: 1;
-        }
-
-        .transaction-id {
-            font-size: 10px;
-            color: #666;
-        }
-
-        .transaction-type {
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 3px;
-        }
-
-        .transaction-date {
-            font-size: 10px;
-            color: #666;
-            margin-top: 3px;
-        }
-
-        .transaction-right {
-            text-align: right;
-        }
-
-        .transaction-amount {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .transaction-status {
-            font-size: 10px;
-            margin-top: 3px;
-        }
-
+        .transaction-left { flex: 1; }
+        .transaction-id { font-size: 10px; color: #666; }
+        .transaction-type { font-size: 13px; font-weight: bold; margin-top: 3px; }
+        .transaction-date { font-size: 10px; color: #666; margin-top: 3px; }
+        .transaction-right { text-align: right; }
+        .transaction-amount { font-size: 16px; font-weight: bold; }
+        .transaction-status { font-size: 10px; margin-top: 3px; }
         .status-completed { color: var(--green); }
         .status-pending { color: orange; }
         .status-failed { color: var(--red); }
-
         .deposit-amount { color: var(--green); }
         .withdraw-amount { color: var(--red); }
         .fee-amount { color: orange; }
         .reward-amount { color: #00bcd4; }
 
-        .logout-btn-container {
-            margin: 20px;
-            text-align: center;
-        }
-
+        /* Logout */
+        .logout-btn-container { margin: 20px; text-align: center; }
         .logout-btn {
             background: transparent;
             border: 1px solid var(--red);
@@ -320,12 +215,9 @@
             width: 100%;
             max-width: 300px;
         }
+        .logout-btn:hover { background: var(--red); color: white; }
 
-        .logout-btn:hover {
-            background: var(--red);
-            color: white;
-        }
-
+        /* Modal Base */
         .modal {
             display: none;
             position: fixed;
@@ -333,7 +225,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.96);
             justify-content: center;
             align-items: center;
             z-index: 3000;
@@ -342,23 +234,26 @@
         .modal-content {
             background: var(--card);
             padding: 25px;
-            border-radius: 15px;
-            width: 85%;
-            max-width: 320px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 420px;
             text-align: center;
             border: 1px solid var(--gold);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h3 {
             margin-bottom: 15px;
             color: var(--gold);
+            font-size: 22px;
         }
 
         .modal-input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 15px 0;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--gold);
             background: #333;
             color: white;
@@ -366,22 +261,190 @@
             text-align: center;
         }
 
-        .modal-input:focus {
-            outline: none;
-            border-color: var(--green);
+        .modal-input:focus { outline: none; border-color: var(--green); }
+
+        /* Amount Options */
+        .amount-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
         }
 
-        .gateway-select {
-            width: 100%;
+        .amount-option {
             padding: 12px;
-            margin: 10px 0;
+            background: #333;
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .amount-option:hover, .amount-option.selected {
+            background: var(--gold);
+            color: black;
+        }
+
+        /* Payment Modal - Professional Design */
+        .payment-amount-display {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .payment-amount-display .label { font-size: 12px; color: #aaa; }
+        .payment-amount-display .amount { font-size: 32px; font-weight: bold; color: var(--gold); }
+
+        /* QR Code Section */
+        .qr-section {
+            background: var(--card-light);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .qr-code {
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .qr-code img {
+            width: 180px;
+            height: 180px;
+            display: block;
+        }
+        .qr-text {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* UPI Section */
+        .upi-section {
+            background: var(--card-light);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .upi-label {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .upi-id {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--gold);
+            font-family: monospace;
+            word-break: break-all;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 8px 0;
+        }
+        .btn-copy {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 8px 20px;
             border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-copy:hover { background: #0b7dda; }
+
+        /* Payment Apps Section */
+        .apps-section {
+            background: var(--card-light);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .apps-title {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .payment-apps {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .app-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 12px 8px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            border: none;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .app-phonepe { background: #5f259f; color: white; }
+        .app-googlepay { background: #4285f4; color: white; }
+        .app-paytm { background: #00baf2; color: white; }
+        .app-bhim { background: #e64a19; color: white; }
+        .app-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* Important Note */
+        .important-note {
+            background: #ff9800;
+            padding: 14px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .important-note .note-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        .important-note p {
+            font-size: 11px;
+            color: #000;
+            margin: 5px 0;
+        }
+        .important-note .highlight {
+            font-weight: bold;
+            background: #fff3e0;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* UTR Input Section */
+        .utr-section {
+            margin-top: 20px;
+        }
+        .utr-section input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
             border: 1px solid var(--gold);
             background: #333;
             color: white;
-            font-size: 14px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
         }
 
+        /* Navbar */
         .nav {
             position: fixed;
             bottom: 0;
@@ -389,10 +452,9 @@
             background: #1a1a1a;
             display: flex;
             height: 60px;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--border);
             z-index: 2000;
         }
-
         .nav-item {
             flex: 1;
             display: flex;
@@ -403,47 +465,40 @@
             color: #888;
             cursor: pointer;
         }
+        .nav-item.active { color: var(--gold); }
+        .nav-item span { font-size: 20px; margin-bottom: 3px; }
 
-        .nav-item.active {
-            color: var(--gold);
-        }
-
-        .nav-item span {
-            font-size: 20px;
-            margin-bottom: 3px;
-        }
-
+        /* Message */
         .message {
             position: fixed;
             top: 70px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
             z-index: 4000;
             font-size: 14px;
+            font-weight: bold;
             animation: slideDown 0.3s ease;
         }
-
-        .message-success {
-            background: var(--green);
-            color: white;
-        }
-
-        .message-error {
-            background: var(--red);
-            color: white;
-        }
-
+        .message-success { background: var(--green); color: white; }
+        .message-error { background: var(--red); color: white; }
         @keyframes slideDown {
-            from {
-                top: 0;
-                opacity: 0;
-            }
-            to {
-                top: 70px;
-                opacity: 1;
-            }
+            from { top: 0; opacity: 0; }
+            to { top: 70px; opacity: 1; }
+        }
+
+        /* Scrollbar */
+        .modal-content::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 10px;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -515,6 +570,9 @@
                     <div class="transaction-id">{{ transaction.transaction_id }}</div>
                     <div class="transaction-type">{{ transaction.get_transaction_type_display }}</div>
                     <div class="transaction-date">{{ transaction.created_at|date:"d M Y, h:i A" }}</div>
+                    {% if transaction.utr_number %}
+                    <div class="transaction-id">UTR: {{ transaction.utr_number }}</div>
+                    {% endif %}
                 </div>
                 <div class="transaction-right">
                     <div class="transaction-amount 
@@ -542,31 +600,107 @@
         <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
     </div>
 
-    <!-- Deposit Modal - FIXED -->
+    <!-- DEPOSIT MODAL - Step 1: Select Amount -->
     <div id="depositModal" class="modal">
         <div class="modal-content">
             <h3>💰 Deposit Money</h3>
             <p style="font-size: 12px; color: #aaa;">Minimum ₹10 | Maximum ₹50,000</p>
-            <input type="number" id="depositAmount" class="modal-input" placeholder="Enter amount" min="10" max="50000" step="10">
-            <select id="gatewaySelect" class="gateway-select">
-                <option value="phonepe">📱 PhonePe (UPI)</option>
-                <option value="nextpay">💳 Card / NetBanking</option>
-            </select>
-            <button class="btn-deposit" style="width: 100%; margin-bottom: 10px;" onclick="submitDeposit()">
-                Deposit Now
+            
+            <div class="amount-options">
+                <button type="button" class="amount-option" onclick="selectAmount(event, 100)">₹100</button>
+                <button type="button" class="amount-option" onclick="selectAmount(event, 200)">₹200</button>
+                <button type="button" class="amount-option" onclick="selectAmount(event, 500)">₹500</button>
+                <button type="button" class="amount-option" onclick="selectAmount(event, 1000)">₹1,000</button>
+                <button type="button" class="amount-option" onclick="selectAmount(event, 2000)">₹2,000</button>
+                <button type="button" class="amount-option" onclick="selectAmount(event, 5000)">₹5,000</button>
+            </div>
+            
+            <input type="number" id="depositAmount" class="modal-input" placeholder="Or enter custom amount" min="10" max="50000" step="10">
+            
+            <button class="btn-deposit" style="width: 100%; margin-bottom: 10px;" onclick="getPaymentDetails()">
+                Proceed to Payment
             </button>
             <button class="back-btn" style="width: 100%;" onclick="closeModals()">Cancel</button>
         </div>
     </div>
 
-    <!-- Withdraw Modal -->
+    <!-- PAYMENT MODAL - Professional Design -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3>💳 Complete Payment</h3>
+            
+            <div class="payment-amount-display">
+                <div class="label">Amount to Pay</div>
+                <div class="amount" id="paymentAmount">₹0</div>
+            </div>
+
+            <!-- QR CODE SECTION -->
+            <div class="qr-section">
+                <div class="qr-code">
+                    <img id="qrCodeImage" src="" alt="Scan QR Code to Pay">
+                </div>
+                <div class="qr-text">📸 Scan QR Code with any UPI app to pay</div>
+            </div>
+
+            <!-- UPI ID SECTION -->
+            <div class="upi-section">
+                <div class="upi-label">🔤 OR Pay using UPI ID</div>
+                <div class="upi-id" id="upiIdDisplay">yourbusiness@okhdfcbank</div>
+                <button class="btn-copy" onclick="copyUPI()">📋 Copy UPI ID</button>
+            </div>
+
+            <!-- PAYMENT APPS SECTION -->
+            <div class="apps-section">
+                <div class="apps-title">⚡ Quick Pay with your favourite app</div>
+                <div class="payment-apps">
+                    <button class="app-btn app-phonepe" onclick="openApp('phonepe')">📱 PhonePe</button>
+                    <button class="app-btn app-googlepay" onclick="openApp('googlepay')">💳 Google Pay</button>
+                    <button class="app-btn app-paytm" onclick="openApp('paytm')">🏦 Paytm</button>
+                    <button class="app-btn app-bhim" onclick="openApp('bhim')">🆔 BHIM UPI</button>
+                </div>
+            </div>
+
+            <!-- IMPORTANT NOTE -->
+            <div class="important-note">
+                <div class="note-title">⚠️ IMPORTANT - PLEASE READ</div>
+                <p>1️⃣ Send <span class="highlight">exact amount</span> to the UPI ID above or scan QR code</p>
+                <p>2️⃣ After successful payment, you will get a <span class="highlight">UTR Number</span> in your payment app</p>
+                <p>3️⃣ Enter the <span class="highlight">UTR Number</span> in the box below</p>
+                <p>4️⃣ Click <span class="highlight">"Verify & Add Balance"</span> - Money will be added INSTANTLY</p>
+                <p style="margin-top: 8px;">❌ <strong>DO NOT FORGET</strong> to enter UTR number, otherwise balance will not be added!</p>
+            </div>
+
+            <!-- UTR INPUT SECTION -->
+            <div class="utr-section">
+                <input type="hidden" id="paymentTransactionId">
+                <input type="hidden" id="paymentAmountHidden">
+                <input type="text" id="utrNumber" class="modal-input" placeholder="Enter UTR Number (e.g., HDFC1234567890)" autocomplete="off">
+                <button class="btn-deposit" style="width: 100%; padding: 14px; font-size: 16px;" onclick="submitUTR()">
+                    ✅ Verify UTR & Add Balance
+                </button>
+            </div>
+
+            <button class="back-btn" style="width: 100%; margin-top: 15px;" onclick="closePaymentModal()">← Back</button>
+        </div>
+    </div>
+
+    <!-- WITHDRAW MODAL -->
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <h3>💸 Withdraw Money</h3>
             <p style="font-size: 12px; color: #aaa;">Minimum ₹50 | Current Balance: ₹{{ wallet_balance|floatformat:2 }}</p>
             <p style="font-size: 11px; color: #ff9800;">⚠️ Funds will be on hold until admin approval</p>
             
-            <input type="number" id="withdrawAmount" class="modal-input" placeholder="Enter amount" min="50" step="10">
+            <div class="amount-options">
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 100)">₹100</button>
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 200)">₹200</button>
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 500)">₹500</button>
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 1000)">₹1,000</button>
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 2000)">₹2,000</button>
+                <button type="button" class="amount-option" onclick="selectWithdrawAmount(event, 5000)">₹5,000</button>
+            </div>
+            
+            <input type="number" id="withdrawAmount" class="modal-input" placeholder="Or enter custom amount" min="50" step="10">
             <input type="text" id="withdrawUpiId" class="modal-input" placeholder="Your UPI ID (e.g., username@okhdfcbank)" required>
             
             <button class="btn-withdraw" style="width: 100%; margin-bottom: 10px;" onclick="submitWithdraw()">
@@ -592,24 +726,34 @@
     </nav>
 
     <script>
-        function goBack() {
-            window.location.href = '/mine';
-        }
+        let currentTransactionId = '';
+        let currentUpiId = '';
+        let currentAmount = 0;
+        let currentQrCodeUrl = '';
+        let selectedAmountElement = null;
+        let selectedWithdrawElement = null;
 
-        function goHome() {
-            window.location.href = '/mine';
-        }
-
-        function goHistory() {
-            window.location.href = '/history/';
-        }
+        function goBack() { window.location.href = '/mine'; }
+        function goHome() { window.location.href = '/mine'; }
+        function goHistory() { window.location.href = '/history/'; }
 
         function openDepositModal() {
             document.getElementById('depositModal').style.display = 'flex';
+            if (selectedAmountElement) {
+                selectedAmountElement.classList.remove('selected');
+                selectedAmountElement = null;
+            }
+            document.getElementById('depositAmount').value = '';
         }
 
         function openWithdrawModal() {
             document.getElementById('withdrawModal').style.display = 'flex';
+            if (selectedWithdrawElement) {
+                selectedWithdrawElement.classList.remove('selected');
+                selectedWithdrawElement = null;
+            }
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawUpiId').value = '';
         }
 
         function closeModals() {
@@ -617,10 +761,26 @@
             document.getElementById('withdrawModal').style.display = 'none';
         }
 
-        // FIXED: Deposit function with gateway selection
-        async function submitDeposit() {
-            const amount = document.getElementById('depositAmount').value;
-            const gateway = document.getElementById('gatewaySelect').value;
+        function selectAmount(event, amount) {
+            if (selectedAmountElement) {
+                selectedAmountElement.classList.remove('selected');
+            }
+            selectedAmountElement = event.target;
+            selectedAmountElement.classList.add('selected');
+            document.getElementById('depositAmount').value = amount;
+        }
+
+        function selectWithdrawAmount(event, amount) {
+            if (selectedWithdrawElement) {
+                selectedWithdrawElement.classList.remove('selected');
+            }
+            selectedWithdrawElement = event.target;
+            selectedWithdrawElement.classList.add('selected');
+            document.getElementById('withdrawAmount').value = amount;
+        }
+
+        async function getPaymentDetails() {
+            let amount = document.getElementById('depositAmount').value;
             
             if (!amount || amount < 10) {
                 showMessage('Minimum deposit is ₹10', 'error');
@@ -632,40 +792,141 @@
                 return;
             }
             
-            const depositBtn = document.querySelector('#depositModal .btn-deposit');
-            depositBtn.disabled = true;
-            depositBtn.textContent = 'Processing...';
+            const btn = document.querySelector('#depositModal .btn-deposit');
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
             
             try {
-                const response = await fetch('/api/deposit/initiate/', {
+                const response = await fetch('/api/get-payment-details/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ 
-                        amount: parseFloat(amount),
-                        gateway: gateway
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    currentTransactionId = data.transaction_id;
+                    currentUpiId = data.upi_id;
+                    currentAmount = data.amount;
+                    currentQrCodeUrl = data.qr_code_url || `https://chart.googleapis.com/chart?cht=qr&chl=pay?pa=${data.upi_id}&am=${data.amount}&cu=INR&pn=MinesGame&chs=200x200`;
+                    
+                    document.getElementById('paymentAmount').textContent = `₹${data.amount}`;
+                    document.getElementById('upiIdDisplay').textContent = data.upi_id;
+                    document.getElementById('paymentTransactionId').value = data.transaction_id;
+                    document.getElementById('paymentAmountHidden').value = data.amount;
+                    document.getElementById('qrCodeImage').src = currentQrCodeUrl;
+                    
+                    document.getElementById('depositModal').style.display = 'none';
+                    document.getElementById('paymentModal').style.display = 'flex';
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                
+            } catch (error) {
+                showMessage('Something went wrong!', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Proceed to Payment';
+            }
+        }
+
+        function openApp(appName) {
+            const upi = currentUpiId;
+            const amount = currentAmount;
+            const name = "MinesGame";
+            
+            let url = '';
+            
+            switch(appName) {
+                case 'phonepe':
+                    url = `phonepe://pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+                    break;
+                case 'googlepay':
+                    url = `tez://upi/pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+                    break;
+                case 'paytm':
+                    url = `paytmmp://pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+                    break;
+                case 'bhim':
+                    url = `bhim://upi/pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+                    break;
+            }
+            
+            window.location.href = url;
+            
+            setTimeout(() => {
+                window.location.href = `https://www.phonepe.com/upi/pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+            }, 1000);
+            
+            showMessage(`Opening ${appName}... After payment, come back and enter UTR number`, 'success');
+        }
+
+        function copyUPI() {
+            navigator.clipboard.writeText(currentUpiId);
+            showMessage('UPI ID copied!', 'success');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            document.getElementById('utrNumber').value = '';
+        }
+
+        async function submitUTR() {
+            const utrNumber = document.getElementById('utrNumber').value.trim();
+            const transactionId = document.getElementById('paymentTransactionId').value;
+            const amount = document.getElementById('paymentAmountHidden').value;
+            
+            if (!utrNumber) {
+                showMessage('❌ Please enter UTR number', 'error');
+                return;
+            }
+            
+            if (utrNumber.length < 8) {
+                showMessage('❌ Please enter a valid UTR number', 'error');
+                return;
+            }
+            
+            const verifyBtn = document.querySelector('#paymentModal .btn-deposit');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying UTR...';
+            
+            try {
+                const response = await fetch('/api/verify-utr/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        transaction_id: transactionId,
+                        utr_number: utrNumber,
+                        amount: parseFloat(amount)
                     })
                 });
                 
                 const data = await response.json();
                 
-                if (data.status === 'success' && data.payment_url) {
-                    window.location.href = data.payment_url;
+                if (data.status === 'success') {
+                    showMessage(data.message, 'success');
+                    closePaymentModal();
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
-                    showMessage(data.message || 'Payment initialization failed', 'error');
-                    depositBtn.disabled = false;
-                    depositBtn.textContent = 'Deposit Now';
+                    showMessage(data.message, 'error');
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = '✅ Verify UTR & Add Balance';
                 }
+                
             } catch (error) {
                 showMessage('Something went wrong!', 'error');
-                depositBtn.disabled = false;
-                depositBtn.textContent = 'Deposit Now';
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '✅ Verify UTR & Add Balance';
             }
         }
 
-        // FIXED: Withdraw function - correct API endpoint
         async function submitWithdraw() {
             const amount = document.getElementById('withdrawAmount').value;
             const upiId = document.getElementById('withdrawUpiId').value;
@@ -696,7 +957,7 @@
             withdrawBtn.textContent = 'Processing...';
             
             try {
-                const response = await fetch('/api/withdraw/', {
+                const response = await fetch('/api/request-withdrawal/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -735,9 +996,7 @@
             messageDiv.textContent = msg;
             document.body.appendChild(messageDiv);
             
-            setTimeout(() => {
-                messageDiv.remove();
-            }, 3000);
+            setTimeout(() => messageDiv.remove(), 4000);
         }
 
         async function handleLogout() {
