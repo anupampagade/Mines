@@ -110,3 +110,12 @@ class PaymentGatewayLog(models.Model):
     
     def __str__(self):
         return f"Gateway: {self.gateway_transaction_id}"
+
+
+        # Wallet model mein yeh function hona chahiye:
+    def deduct_balance(self, amount):
+            if self.balance >= amount:
+                self.balance = self.balance - amount  # Decimal - Decimal = OK
+                self.save()
+                return True
+            return False

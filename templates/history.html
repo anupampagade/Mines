@@ -5,57 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mines History - Rewards</title>
     <style>
-        :root {
-            --gold: #d4af37; --bg: #121212; --card: #1e1e1e;
-            --green: #4caf50; --red: #c62828; --text: #f5f5f5;
-        }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; text-align: center; }
+        :root { --gold: #d4af37; --bg: #121212; --card: #1e1e1e; --green: #4caf50; --red: #c62828; --text: #f5f5f5; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; text-align: center; }
         
+        .header { background: #1a1a1a; padding: 15px; border-bottom: 1px solid #333; color: var(--gold); font-weight: bold; margin: -20px -20px 20px -20px; }
         .section-title { color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px; text-align: left; }
         .date-header { font-size: 14px; color: #888; margin: 20px 0 10px 0; text-align: left; font-weight: bold; }
 
-        /* --------- UNUSED SCRATCH CARDS DESIGN --------- */
         .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-bottom: 40px; }
-        
         .scratch-card-mini {
-            background: linear-gradient(135deg, #444, #222);
-            border: 2px dashed var(--gold); border-radius: 10px;
+            background: linear-gradient(135deg, #444, #222); border: 2px dashed var(--gold); border-radius: 10px;
             padding: 15px; cursor: pointer; position: relative; transition: 0.3s;
         }
         .scratch-card-mini:hover { transform: scale(1.05); }
         .card-type { font-size: 10px; color: var(--gold); display: block; margin-bottom: 5px; }
         .card-icon { font-size: 24px; display: block; }
-        .revealed-id { color: var(--gold); font-weight: bold; font-size: 14px; margin-top: 5px; }
+        .revealed-id { color: var(--gold); font-weight: bold; font-size: 14px; margin-top: 5px; word-break: break-all;}
+        .card-amount { color: var(--green); font-size: 12px; margin-top: 5px; display: block; }
 
-        /* --------- USED LIST DESIGN --------- */
         .used-list { background: var(--card); border-radius: 10px; border: 1px solid #333; overflow: hidden; }
-        .used-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 15px; border-bottom: 1px solid #222; font-size: 14px;
-        }
+        .used-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #222; font-size: 14px; }
         .used-item .win-id { color: #666; text-decoration: line-through; }
-        .status-expire { color: var(--red); font-size: 11px; font-weight: bold; }
+        .status-claimed { color: var(--green); font-size: 11px; font-weight: bold; }
 
-        /* --------- MODAL STYLE (Game sarkha) --------- */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-content {
-            background: var(--card); padding: 30px; border-radius: 15px; width: 85%; max-width: 320px; 
-            text-align: center; border: 1px solid var(--gold);
-        }
-        .scratch-area {
-            background: linear-gradient(135deg, #444, #222); height: 100px; line-height: 100px; 
-            border-radius: 10px; border: 2px dashed var(--gold); cursor: pointer; font-weight: bold; margin: 15px 0;
-        }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 15px; width: 85%; max-width: 320px; text-align: center; border: 1px solid var(--gold); }
         .btn-start { background: var(--green); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        .verify-input { background: #000; border: 2px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 8px; width: 85%; text-align: center; font-size: 1.2rem; margin-bottom: 15px; }
+        #historyScratchCanvas { border-radius: 10px; cursor: crosshair; touch-action: none; }
+        
+        .nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; height: 60px; border-top: 1px solid #333; z-index: 2000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; color: #888; }
+        .nav-item.active { color: var(--gold); }
     </style>
 </head>
 <body>
 
-    <h1>📜 Reward History</h1>
+    <div class="header">📜 Reward History</div>
 
     <h3 class="section-title">🎁 Unused Rewards</h3>
     
@@ -66,9 +51,10 @@
         <div class="rewards-grid">
             {% for item in date.list %}
                 {% if item.status != 'CLAIMED' %}
-                <div class="scratch-card-mini" onclick="openClaimModal('{{ item.win_id }}', '{{ item.status }}')">
+                <div class="scratch-card-mini" onclick="openClaimModal('{{ item.win_id }}', '{{ item.status }}', '{{ item.win_amount }}')">
                     <span class="card-type">REWARD</span>
                     <span class="card-icon">🎁</span>
+                    <span class="card-amount">₹{{ item.win_amount|floatformat:2 }}</span>
                     {% if item.status == 'SCRATCHED' %}
                         <div class="revealed-id">{{ item.win_id }}</div>
                     {% else %}
@@ -80,107 +66,129 @@
         </div>
     {% endfor %}
 
-    <h3 class="section-title">✅ Used / Expired</h3>
+    <h3 class="section-title">✅ Claimed History</h3>
     <div class="used-list">
         {% for item in history %}
             {% if item.status == 'CLAIMED' %}
             <div class="used-item">
                 <div style="text-align: left;">
                     <span class="win-id">{{ item.win_id }}</span><br>
+                    <small style="color: var(--green);">+ ₹{{ item.win_amount|floatformat:2 }}</small><br>
                     <small style="color: #555;">{{ item.created_at|date:"d M Y" }}</small>
                 </div>
-                <span class="status-expire">EXPIRED</span>
+                <span class="status-claimed">CLAIMED</span>
             </div>
             {% endif %}
         {% endfor %}
+        {% if not history %}
+            <p style="padding: 20px; color: #666;">No history yet.</p>
+        {% endif %}
     </div>
 
     <br><br>
-    <button class="btn-start" style="background: #333;" onclick="window.location.href='/mine/'">BACK TO GAME</button>
+    <button class="btn-start" style="background: #333; max-width: 300px; margin: 0 auto;" onclick="window.location.href='/mine/'">BACK TO GAME</button>
 
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">SCRATCH CARD</h3>
-            <div id="historyScratchBox" class="scratch-area" onclick="startHistoryScratch()">SCRATCH HERE</div>
-            
-            <div id="historyRevealZone" style="display:none;">
-                <p>Your Prize ID:</p>
-                <h2 id="historyWinCode" style="color:var(--gold); margin: 10px 0;"></h2>
-                <input type="text" id="historyInputId" class="verify-input" readonly>
-                <button class="btn-start" onclick="submitHistoryClaim()">SUBMIT CLAIM</button>
+            <div style="position: relative; width: 260px; height: 100px; margin: 0 auto;">
+                <div id="histPrizeText" style="position: absolute; top:0; left:0; width:100%; height:100%; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--gold); font-weight: bold; z-index: 1;"></div>
+                <canvas id="historyScratchCanvas" width="260" height="100" style="position: absolute; top:0; left:0; z-index: 2;"></canvas>
             </div>
+            <button id="histClaimBtn" class="btn-start" style="margin-top: 20px; display: none;" onclick="submitHistoryClaim()">ADD ₹<span id="histClaimAmount">0</span> TO WALLET</button>
         </div>
     </div>
+
+    <nav class="nav">
+        <div class="nav-item" onclick="window.location.href='/mine/'"><span>🏠</span>Home</div>
+        <div class="nav-item active"><span>📜</span>History</div>
+        <div class="nav-item" onclick="window.location.href='/account/'"><span>👤</span>Account</div>
+    </nav>
 
   <script>
     let selectedWinId = "";
     let currentStatus = "";
+    let selectedWinAmount = 0;
 
-    function openClaimModal(id, status) {
+    function openClaimModal(id, status, amount) {
         selectedWinId = id;
         currentStatus = status.trim().toUpperCase(); 
+        selectedWinAmount = parseFloat(amount);
         
         const modal = document.getElementById('historyModal');
         const title = document.getElementById('modalTitle');
-        const scratchBox = document.getElementById('historyScratchBox');
-        const revealZone = document.getElementById('historyRevealZone');
-        const winCodeDisplay = document.getElementById('historyWinCode');
-        const inputField = document.getElementById('historyInputId');
-        const submitBtn = document.querySelector('#historyRevealZone .btn-start');
-
+        const canvas = document.getElementById('historyScratchCanvas');
+        const claimBtn = document.getElementById('histClaimBtn');
+        
         modal.style.display = 'flex';
+        document.getElementById('histClaimAmount').innerText = selectedWinAmount.toFixed(2);
+        document.getElementById('histPrizeText').innerText = id;
 
-        // 1. Jar card AADHI-CH SCRATCH kela asel tar (Direct Form)
         if (currentStatus === 'SCRATCHED') {
             title.innerText = "CLAIM REWARD";
-            scratchBox.style.display = 'none'; // Scratch box nako
-            revealZone.style.display = 'block'; // ID zone dakhva
-            
-            // Direct Submit Form dakhva (No waiting)
-            inputField.style.display = 'block';
-            if(submitBtn) submitBtn.style.display = 'block';
-            
-            winCodeDisplay.innerText = id;
-            inputField.value = id;
-        } 
-        // 2. Jar NAVA CARD asel tar (Scratch Here dakhva)
-        else {
+            canvas.style.display = 'none'; 
+            claimBtn.style.display = 'block';
+        } else {
             title.innerText = "SCRATCH CARD";
-            scratchBox.style.display = 'block'; 
-            revealZone.style.display = 'none'; 
-            
-            // Survatila form hide kara (2 second thambaycha aahe mhanun)
-            inputField.style.display = 'none';
-            if(submitBtn) submitBtn.style.display = 'none';
+            canvas.style.display = 'block'; 
+            claimBtn.style.display = 'none';
+            initHistoryScratch();
         }
     }
 
-    async function startHistoryScratch() {
-        // NAVA CARD SCRATCH KELYA-VAR:
-        document.getElementById('historyScratchBox').style.display = 'none';
-        document.getElementById('historyRevealZone').style.display = 'block';
-        document.getElementById('historyWinCode').innerText = selectedWinId;
+    function initHistoryScratch() {
+        const canvas = document.getElementById('historyScratchCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.globalCompositeOperation = 'source-over'; // Reset canvas
+        
+        const gradient = ctx.createLinearGradient(0, 0, 260, 100);
+        gradient.addColorStop(0, '#bfbfbf');
+        gradient.addColorStop(0.5, '#e6e6e6');
+        gradient.addColorStop(1, '#bfbfbf');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 260, 100);
+        ctx.fillStyle = '#555';
+        ctx.font = 'bold 18px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('SCRATCH HERE', 130, 55);
 
-        const inputField = document.getElementById('historyInputId');
-        const submitBtn = document.querySelector('#historyRevealZone .btn-start');
+        let isDrawing = false;
+        let scratchedPixels = 0;
 
-        // Backend Update
-        await fetch('/api/update-status/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify({ win_id: selectedWinId, action: 'scratch' })
-        });
+        function scratch(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            scratchedPixels += Math.PI * 15 * 15;
+            if (scratchedPixels > (260 * 100) * 0.5) clearScratch();
+        }
 
-        // 2 SECOND WAIT (Fakt navya card sathi)
-        setTimeout(() => {
-            inputField.style.display = 'block';
-            inputField.value = selectedWinId;
-            if(submitBtn) submitBtn.style.display = 'block';
-        }, 2000);
+        function clearScratch() {
+            ctx.clearRect(0, 0, 260, 100);
+            canvas.style.pointerEvents = 'none';
+            document.getElementById('histClaimBtn').style.display = 'block';
+            
+            fetch('/api/update-status/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ win_id: selectedWinId, action: 'scratch' })
+            });
+        }
+
+        canvas.onmousedown = (e) => { isDrawing = true; scratch(e.offsetX, e.offsetY); };
+        canvas.onmousemove = (e) => { if(isDrawing) scratch(e.offsetX, e.offsetY); };
+        canvas.onmouseup = () => isDrawing = false;
+        canvas.ontouchstart = (e) => { e.preventDefault(); isDrawing = true; const r = canvas.getBoundingClientRect(); scratch(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); };
+        canvas.ontouchmove = (e) => { e.preventDefault(); if(isDrawing) { const r = canvas.getBoundingClientRect(); scratch(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top); }};
+        canvas.ontouchend = () => isDrawing = false;
     }
 
     async function submitHistoryClaim() {
-        console.log("Submitting claim...");
+        const btn = document.getElementById('histClaimBtn');
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
         await fetch('/api/update-status/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
@@ -193,9 +201,8 @@
     }
 
     window.onclick = function(event) {
-        const modal = document.getElementById('historyModal');
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (event.target == document.getElementById('historyModal')) {
+            document.getElementById('historyModal').style.display = 'none';
         }
     }
 </script>

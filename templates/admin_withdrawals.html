@@ -3,89 +3,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Withdrawal Management</title>
+    <title>Admin Dashboard - Mines Game</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: #1e1e1e; padding: 20px; border-radius: 12px; border-left: 4px solid #ff9800; }
-        .stat-card .number { font-size: 32px; font-weight: bold; color: #ff9800; }
-        .section { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
-        .section h2 { color: #ff9800; margin-bottom: 20px; border-left: 3px solid #ff9800; padding-left: 15px; }
-        .withdrawal-card { background: #2a2a2a; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .btn-approve { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-        .btn-reject { background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-        .btn-copy { background: #2196f3; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; color: white; }
-        th { color: #aaa; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+        
+        .sidebar h2 {
+            color: #ff9800;
+            margin-bottom: 30px;
+            font-size: 20px;
+        }
+        
+        .sidebar .nav-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #aaa;
+        }
+        
+        .sidebar .nav-item:hover, .sidebar .nav-item.active {
+            background: #ff9800;
+            color: #000;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff9800;
+        }
+        
+        /* Tables */
+        .section {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #ff9800;
+            margin-bottom: 20px;
+            border-left: 3px solid #ff9800;
+            padding-left: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        th {
+            color: #ff9800;
+        }
+        
+        .user-row {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .user-row:hover {
+            background: #2a2a2a;
+        }
+        
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .btn-reject {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
         .status-pending { color: #ff9800; }
         .status-completed { color: #4caf50; }
         .status-failed { color: #f44336; }
+        
+        /* User Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: #1e1e1e;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #ff9800;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        
+        .close-btn {
+            cursor: pointer;
+            font-size: 24px;
+            color: #ff9800;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff9800;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .tab-btn {
+            padding: 8px 20px;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        .tab-btn.active {
+            color: #ff9800;
+            border-bottom: 2px solid #ff9800;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💰 Withdrawal Management Admin Panel</h1>
-            <p>Manage all withdrawal requests manually</p>
-        </div>
-        
-        <div class="stats">
+    <div class="sidebar">
+        <h2>🎮 Mines Admin</h2>
+        <div class="nav-item active" onclick="showSection('usersSection')">👥 All Users</div>
+        <div class="nav-item" onclick="showSection('withdrawalsSection')">💸 Withdrawals</div>
+        <div class="nav-item" onclick="showSection('rewardsSection')">🎁 Rewards</div>
+        <div class="nav-item" onclick="window.location.href='/mine/'">← Back to Site</div>
+    </div>
+    
+    <div class="main-content">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>👥 Total Users</h3>
+                <div class="number" id="totalUsers">0</div>
+            </div>
             <div class="stat-card">
                 <h3>⏳ Pending Withdrawals</h3>
-                <div class="number">{{ total_pending }}</div>
+                <div class="number" id="pendingCount">0</div>
             </div>
             <div class="stat-card">
-                <h3>💰 Total Amount Pending</h3>
-                <div class="number">₹{{ total_amount_pending|floatformat:2 }}</div>
+                <h3>💰 Pending Amount</h3>
+                <div class="number" id="pendingAmount">₹0</div>
             </div>
             <div class="stat-card">
-                <h3>✅ Completed Withdrawals</h3>
-                <div class="number">{{ total_completed }}</div>
+                <h3>🎁 Total Rewards</h3>
+                <div class="number" id="totalRewards">0</div>
             </div>
         </div>
         
-        <div class="section">
-            <h2>⏳ Pending Withdrawal Requests</h2>
-            {% if pending_withdrawals %}
-                {% for w in pending_withdrawals %}
-                <div class="withdrawal-card">
-                    <div>
-                        <div><strong>👤 {{ w.user.username }}</strong> (ID: {{ w.user.last_name }})</div>
-                        <div>📅 {{ w.created_at|date:"d M Y, h:i A" }}</div>
-                        <div>🏦 UPI: {{ w.upi_id }} <button class="btn-copy" onclick="copyToClipboard('{{ w.upi_id }}')">Copy</button></div>
-                        <div>🆔 TXN: {{ w.transaction_id }}</div>
-                    </div>
-                    <div style="font-size: 24px; font-weight: bold; color: #ff9800;">₹{{ w.amount|floatformat:2 }}</div>
-                    <div>
-                        <button class="btn-approve" onclick="approveWithdrawal('{{ w.transaction_id }}')">✅ Approve</button>
-                        <button class="btn-reject" onclick="rejectWithdrawal('{{ w.transaction_id }}')">❌ Reject</button>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>No pending withdrawals</p>
-            {% endif %}
+        <!-- Users Section -->
+        <div id="usersSection" class="section">
+            <h2>👥 All Users</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Username</th><th>Email</th><th>Balance</th><th>Total Wins</th><th>Joined</th></tr>
+                    </thead>
+                    <tbody id="usersTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Withdrawals Section -->
+        <div id="withdrawalsSection" class="section" style="display: none;">
+            <h2>💸 Pending Withdrawals</h2>
+            <div id="pendingWithdrawalsList"></div>
+        </div>
+        
+        <!-- Rewards Section -->
+        <div id="rewardsSection" class="section" style="display: none;">
+            <h2>🎁 All Rewards</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>User</th><th>Win ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                    <tbody id="rewardsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
     
+    <!-- User Detail Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalUserName">User Details</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <div class="info-grid" id="userInfo"></div>
+            
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('deposits')">💰 Deposits</button>
+                <button class="tab-btn" onclick="showTab('withdrawals')">💸 Withdrawals</button>
+                <button class="tab-btn" onclick="showTab('pending')">⏳ Pending Withdrawals</button>
+                <button class="tab-btn" onclick="showTab('rewards')">🎁 Rewards</button>
+            </div>
+            
+            <div id="depositsTab" class="tab-content active">
+                <table style="width:100%"><thead><tr><th>ID</th><th>Amount</th><th>UTR</th><th>Date</th></tr></thead><tbody id="depositsTable"></tbody></table>
+            </div>
+            <div id="withdrawalsTab" class="tab-content">
+                <table style="width:100%"><thead><tr><th>ID</th><th>Amount</th><th>UPI</th><th>Status</th><th>Date</th></tr></thead><tbody id="withdrawalsTable"></tbody></table>
+            </div>
+            <div id="pendingTab" class="tab-content">
+                <table style="width:100%"><thead><tr><th>ID</th><th>Amount</th><th>UPI</th><th>Action</th></tr></thead><tbody id="pendingTable"></tbody></table>
+            </div>
+            <div id="rewardsTab" class="tab-content">
+                <table style="width:100%"><thead><tr><th>Win ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="userRewardsTable"></tbody></table>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            alert('Copied: ' + text);
+        let currentUserId = null;
+        
+        // Load all data on page load
+        async function loadAllData() {
+            await loadUsers();
+            await loadWithdrawals();
+            await loadRewards();
+            await loadStats();
+        }
+        
+        async function loadStats() {
+            const res = await fetch('/api/admin/stats/', {
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const data = await res.json();
+            document.getElementById('totalUsers').innerText = data.total_users;
+            document.getElementById('pendingCount').innerText = data.pending_withdrawals;
+            document.getElementById('pendingAmount').innerText = `₹${data.pending_amount}`;
+            document.getElementById('totalRewards').innerText = data.total_rewards;
+        }
+        
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users/', {
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const users = await res.json();
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                const row = tbody.insertRow();
+                row.className = 'user-row';
+                row.onclick = () => showUserDetails(user.id);
+                row.insertCell(0).innerText = user.id;
+                row.insertCell(1).innerText = user.username;
+                row.insertCell(2).innerText = user.email;
+                row.insertCell(3).innerHTML = `<span style="color:#4caf50">₹${user.balance}</span>`;
+                row.insertCell(4).innerText = user.total_wins;
+                row.insertCell(5).innerText = user.joined_date;
+            });
+        }
+        
+        async function loadWithdrawals() {
+            const res = await fetch('/api/admin/pending-withdrawals/', {
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const withdrawals = await res.json();
+            const container = document.getElementById('pendingWithdrawalsList');
+            if (withdrawals.length === 0) {
+                container.innerHTML = '<p>No pending withdrawals</p>';
+                return;
+            }
+            container.innerHTML = '';
+            withdrawals.forEach(w => {
+                container.innerHTML += `
+                    <div style="background:#2a2a2a; padding:15px; margin-bottom:10px; border-radius:10px;">
+                        <div><strong>👤 ${w.username}</strong> (ID: ${w.user_id})</div>
+                        <div>📅 ${w.created_at}</div>
+                        <div>🏦 UPI: ${w.upi_id}</div>
+                        <div>🆔 TXN: ${w.transaction_id}</div>
+                        <div style="font-size:24px; font-weight:bold; color:#ff9800; margin:10px 0;">₹${w.amount}</div>
+                        <div>
+                            <button class="btn-approve" onclick="approveWithdrawal('${w.transaction_id}')">✅ Approve</button>
+                            <button class="btn-reject" onclick="rejectWithdrawal('${w.transaction_id}')">❌ Reject</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        async function loadRewards() {
+            const res = await fetch('/api/admin/all-rewards/', {
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const rewards = await res.json();
+            const tbody = document.getElementById('rewardsTable');
+            tbody.innerHTML = '';
+            rewards.forEach(r => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = r.username;
+                row.insertCell(1).innerText = r.win_id;
+                row.insertCell(2).innerHTML = `<span style="color:#4caf50">₹${r.amount}</span>`;
+                row.insertCell(3).innerText = r.status;
+                row.insertCell(4).innerText = r.date;
+            });
+        }
+        
+        async function showUserDetails(userId) {
+            currentUserId = userId;
+            const res = await fetch(`/api/admin/user-detail/${userId}/`, {
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+            const data = await res.json();
+            
+            document.getElementById('modalUserName').innerText = `${data.username} - Details`;
+            document.getElementById('userInfo').innerHTML = `
+                <div class="info-item"><div class="info-label">User ID</div><div class="info-value">${data.id}</div></div>
+                <div class="info-item"><div class="info-label">Username</div><div class="info-value">${data.username}</div></div>
+                <div class="info-item"><div class="info-label">Email</div><div class="info-value">${data.email}</div></div>
+                <div class="info-item"><div class="info-label">Balance</div><div class="info-value">₹${data.balance}</div></div>
+                <div class="info-item"><div class="info-label">Total Wins</div><div class="info-value">${data.total_wins}</div></div>
+                <div class="info-item"><div class="info-label">Joined</div><div class="info-value">${data.joined_date}</div></div>
+            `;
+            
+            // Deposits
+            let depositsHtml = '';
+            data.deposits.forEach(d => {
+                depositsHtml += `<tr><td>${d.transaction_id}</td><td>₹${d.amount}</td><td>${d.utr_number || '-'}</td><td>${d.date}</td></tr>`;
+            });
+            document.getElementById('depositsTable').innerHTML = depositsHtml || '<tr><td colspan="4">No deposits</td></tr>';
+            
+            // Withdrawals (completed)
+            let withdrawalsHtml = '';
+            data.completed_withdrawals.forEach(w => {
+                withdrawalsHtml += `<tr><td>${w.transaction_id}</td><td>₹${w.amount}</td><td>${w.upi_id}</td><td class="status-completed">${w.status}</td><td>${w.date}</td></tr>`;
+            });
+            document.getElementById('withdrawalsTable').innerHTML = withdrawalsHtml || '<tr><td colspan="5">No withdrawals</td></tr>';
+            
+            // Pending Withdrawals
+            let pendingHtml = '';
+            data.pending_withdrawals.forEach(p => {
+                pendingHtml += `
+                    <tr>
+                        <td>${p.transaction_id}</td>
+                        <td>₹${p.amount}</td>
+                        <td>${p.upi_id}</td>
+                        <td>
+                            <button class="btn-approve" onclick="approveWithdrawalFromModal('${p.transaction_id}')">Approve</button>
+                            <button class="btn-reject" onclick="rejectWithdrawalFromModal('${p.transaction_id}')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('pendingTable').innerHTML = pendingHtml || '<tr><td colspan="4">No pending withdrawals</td></tr>';
+            
+            // User Rewards
+            let rewardsHtml = '';
+            data.rewards.forEach(r => {
+                let statusClass = r.status === 'CLAIMED' ? 'status-completed' : 'status-pending';
+                rewardsHtml += `<tr><td>${r.win_id}</td><td>₹${r.amount}</td><td class="${statusClass}">${r.status}</td><td>${r.date}</td></tr>`;
+            });
+            document.getElementById('userRewardsTable').innerHTML = rewardsHtml || '<tr><td colspan="4">No rewards</td></tr>';
+            
+            document.getElementById('userModal').style.display = 'flex';
         }
         
         async function approveWithdrawal(id) {
             if(confirm('Have you sent money to the user?')) {
-                const response = await fetch(`/admin/withdrawals/${id}/approve/`, {
+                const res = await fetch(`/admin/withdrawals/${id}/approve/`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
                     body: JSON.stringify({})
                 });
-                const data = await response.json();
+                const data = await res.json();
                 alert(data.message);
                 if(data.status === 'success') location.reload();
             }
@@ -93,14 +475,48 @@
         
         async function rejectWithdrawal(id) {
             const reason = prompt('Reason for rejection:');
-            const response = await fetch(`/admin/withdrawals/${id}/reject/`, {
+            const res = await fetch(`/admin/withdrawals/${id}/reject/`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
                 body: JSON.stringify({reason: reason})
             });
-            const data = await response.json();
+            const data = await res.json();
             alert(data.message);
             if(data.status === 'success') location.reload();
+        }
+        
+        async function approveWithdrawalFromModal(id) {
+            await approveWithdrawal(id);
+        }
+        
+        async function rejectWithdrawalFromModal(id) {
+            await rejectWithdrawal(id);
+        }
+        
+        function showSection(sectionId) {
+            document.getElementById('usersSection').style.display = 'none';
+            document.getElementById('withdrawalsSection').style.display = 'none';
+            document.getElementById('rewardsSection').style.display = 'none';
+            document.getElementById(sectionId).style.display = 'block';
+            
+            document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function showTab(tabName) {
+            document.getElementById('depositsTab').classList.remove('active');
+            document.getElementById('withdrawalsTab').classList.remove('active');
+            document.getElementById('pendingTab').classList.remove('active');
+            document.getElementById('rewardsTab').classList.remove('active');
+            
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
         }
         
         function getCookie(name) {
@@ -117,6 +533,8 @@
             }
             return value;
         }
+        
+        loadAllData();
     </script>
 </body>
 </html>
