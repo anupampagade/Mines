@@ -13,7 +13,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
+from django.conf import settings
 from .models import GameReward, Wallet, Transaction
 
 
@@ -163,35 +163,34 @@ def get_payment_details(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            amount = float(data.get('amount', 0))
+            amount = data.get('amount')
             
-            if amount < 10:
-                return JsonResponse({'status': 'error', 'message': 'Minimum deposit is ₹10'})
-            if amount > 50000:
-                return JsonResponse({'status': 'error', 'message': 'Maximum deposit is ₹50,000'})
+            # Get UPI ID from settings
+            upi_id = settings.BUSINESS_UPI_ID  # "8806261014@ybl"
             
+            # Create transaction record
             transaction = Transaction.objects.create(
                 user=request.user,
-                transaction_type='DEPOSIT',
                 amount=amount,
+                transaction_type='DEPOSIT',
                 status='PENDING',
-                description=f"Deposit of ₹{amount}"
+                upi_id=upi_id
             )
             
-            qr_content = f"pay?pa={BUSINESS_UPI_ID}&am={amount}&cu=INR&pn=MinesGame"
-            qr_url = f"https://chart.googleapis.com/chart?cht=qr&chl={qr_content}&chs=200x200"
+            # Generate QR code (optional - you can use any QR API)
+            qr_code_url = f"https://quickchart.io/qr?text=upi://pay?pa={upi_id}&am={amount}&cu=INR&pn=MinesGame&size=200"
             
             return JsonResponse({
                 'status': 'success',
-                'transaction_id': transaction.transaction_id,
+                'transaction_id': transaction.id,
+                'upi_id': upi_id,
                 'amount': amount,
-                'upi_id': BUSINESS_UPI_ID,
-                'qr_code_url': qr_url
+                'qr_code_url': qr_code_url,
+                'message': 'Payment details generated'
             })
+            
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error'})
-
 @login_required
 def verify_utr_and_update_balance(request):
     if request.method == 'POST':
@@ -423,6 +422,8 @@ def admin_user_detail_api(request, user_id):
 
 # ========== GAME APIS ==========
 
+# ========== GAME APIS ==========
+
 @login_required
 def process_game_fee(request):
     if request.method == 'POST':
@@ -434,12 +435,16 @@ def process_game_fee(request):
         
         wallet, created = Wallet.objects.get_or_create(user=request.user)
         
-        if wallet.balance >= amount:
-            wallet.deduct_balance(amount)
+        # 🔥 FIX: Decimal me convert kar
+        from decimal import Decimal
+        amount_decimal = Decimal(str(amount))
+        
+        if wallet.balance >= amount_decimal:
+            wallet.deduct_balance(amount_decimal)  # ✅ Decimal pass kar
             Transaction.objects.create(
                 user=request.user,
                 transaction_type='GAME_FEE',
-                amount=amount,
+                amount=amount_decimal,
                 status='COMPLETED',
                 description=f"Game entry fee"
             )
@@ -447,7 +452,6 @@ def process_game_fee(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'Insufficient balance!'})
     return JsonResponse({'status': 'error'})
-
 @login_required
 def save_win_api(request):
     if request.method == "POST":
@@ -531,12 +535,17 @@ def add_win_amount(request):
         try:
             data = json.loads(request.body)
             amount = float(data.get('amount', 0))
+            
+            from decimal import Decimal
+            amount_decimal = Decimal(str(amount))
+            
             wallet, _ = Wallet.objects.get_or_create(user=request.user)
-            wallet.add_balance(amount)
+            wallet.add_balance(amount_decimal)  # ✅ Decimal pass kar
+            
             Transaction.objects.create(
                 user=request.user,
                 transaction_type='WIN_REWARD',
-                amount=amount,
+                amount=amount_decimal,
                 status='COMPLETED',
                 description="Mines game win reward"
             )
@@ -544,7 +553,6 @@ def add_win_amount(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error'})
-
 @login_required
 def account_data_api(request):
     user = request.user

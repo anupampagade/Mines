@@ -15,6 +15,10 @@
             --text: #f5f5f5;
             --text-muted: #888;
             --border: #333;
+            --phonepe: #5f259f;
+            --googlepay: #4285f4;
+            --paytm: #00baf2;
+            --bhim: #e64a19;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,13 +47,15 @@
         .info-grid { margin: 20px; }
         .info-card { background: var(--card); padding: 15px 20px; border-radius: 12px; border-left: 4px solid var(--gold); display: flex; justify-content: space-between; margin-bottom: 10px; }
 
-        .transactions-section { margin: 20px; }
-        .transactions-title { font-size: 16px; color: var(--gold); margin-bottom: 15px; }
+        /* History Sections */
+        .history-section { margin: 20px; }
+        .history-title { font-size: 16px; color: var(--gold); margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid var(--gold); display: flex; align-items: center; gap: 8px; }
         .transaction-item { background: var(--card); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .transaction-left { flex: 1; }
         .transaction-id { font-size: 10px; color: #666; }
-        .transaction-type { font-size: 13px; font-weight: bold; }
-        .transaction-date { font-size: 10px; color: #666; }
+        .transaction-type { font-size: 13px; font-weight: bold; margin-top: 3px; }
+        .transaction-date { font-size: 10px; color: #666; margin-top: 3px; }
+        .transaction-right { text-align: right; }
         .transaction-amount { font-size: 16px; font-weight: bold; }
         .transaction-status { font-size: 10px; margin-top: 3px; }
         .status-completed { color: var(--green); }
@@ -63,258 +69,467 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; color: #888; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
 
+        /* Modal Styles */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); justify-content: center; align-items: center; z-index: 3000; }
         .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto; }
         .modal-input { width: 100%; padding: 14px; margin: 15px 0; border-radius: 10px; border: 1px solid var(--gold); background: #333; color: white; text-align: center; }
         .amount-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
         .amount-option { padding: 12px; background: #333; border: 1px solid var(--gold); border-radius: 10px; color: white; cursor: pointer; }
         .amount-option.selected { background: var(--gold); color: black; }
+
+        .qr-section { background: var(--card-light); border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: center; }
+        .qr-code { background: white; padding: 15px; border-radius: 16px; display: inline-block; margin-bottom: 12px; }
+        .qr-code img { width: 180px; height: 180px; display: block; }
+        .upi-id { font-size: 18px; font-weight: bold; color: var(--gold); font-family: monospace; background: #1a1a1a; padding: 10px; border-radius: 10px; margin: 8px 0; }
+        .btn-copy { background: #2196f3; color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; }
+        .payment-apps { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
+        .app-btn { flex: 1; min-width: 70px; padding: 12px 8px; border-radius: 12px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .app-phonepe { background: #5f259f; color: white; }
+        .app-googlepay { background: #4285f4; color: white; }
+        .app-paytm { background: #00baf2; color: white; }
+        .app-bhim { background: #e64a19; color: white; }
+        .important-note { background: #ff9800; padding: 14px; border-radius: 12px; margin: 15px 0; text-align: left; }
+        .important-note .note-title { font-size: 13px; font-weight: bold; color: #000; }
+        .important-note p { font-size: 11px; color: #000; margin: 5px 0; }
         
-        .message { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 10px; z-index: 4000; font-size: 14px; font-weight: bold; animation: slideDown 0.3s ease; }
+        .message { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 10px; z-index: 4000; font-size: 14px; font-weight: bold; }
         .message-success { background: var(--green); color: white; }
         .message-error { background: var(--red); color: white; }
-        @keyframes slideDown { from { top: 0; opacity: 0; } to { top: 70px; opacity: 1; } }
         
-        .refresh-btn { background: var(--gold); color: black; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-left: 10px; }
+        .empty-state { text-align: center; color: #666; padding: 20px; font-size: 13px; }
+        
+        .btn-close-modal { background: #333; color: white; border: 1px solid var(--gold); padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="account-header">
-        <button class="back-btn" onclick="goBack()">← Back</button>
-        <h2>My Account <button class="refresh-btn" onclick="refreshAllData()">⟳ Refresh</button></h2>
-        <div style="width: 60px;"></div>
-    </div>
+<div class="account-header">
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <h2>My Account</h2>
+    <div style="width: 60px;"></div>
+</div>
 
-    <div class="profile-card">
-        <div class="avatar">👤</div>
-        <div class="username" id="userName">{{ user_name }}</div>
-        <div class="user-id">🆔 <span id="userId">{{ user_id }}</span></div>
-    </div>
+<div class="profile-card">
+    <div class="avatar">👤</div>
+    <div class="username">{{ user_name }}</div>
+    <div class="user-id">🆔 {{ user_id }}</div>
+</div>
 
-    <div class="wallet-card">
-        <div class="wallet-label">💰 Main Balance</div>
-        <div class="wallet-balance" id="walletBalance">₹{{ wallet_balance|floatformat:2 }}</div>
-        <div class="wallet-buttons">
-            <button class="btn-deposit" onclick="openDepositModal()">➕ Deposit</button>
-            <button class="btn-withdraw" onclick="openWithdrawModal()">💸 Withdraw</button>
-        </div>
+<div class="wallet-card">
+    <div class="wallet-label">💰 Main Balance</div>
+    <div class="wallet-balance" id="walletBalance">₹{{ wallet_balance|floatformat:2 }}</div>
+    <div class="wallet-buttons">
+        <button class="btn-deposit" onclick="openDepositModal()">➕ Deposit</button>
+        <button class="btn-withdraw" onclick="openWithdrawModal()">💸 Withdraw</button>
     </div>
+</div>
 
-    <div class="stats-row">
-        <div class="stat-mini-card">
-            <div class="stat-mini-label">Total Deposited</div>
-            <div class="stat-mini-value" id="totalDeposit">₹{{ total_deposit|floatformat:2 }}</div>
-        </div>
-        <div class="stat-mini-card">
-            <div class="stat-mini-label">Total Withdrawn</div>
-            <div class="stat-mini-value" id="totalWithdraw">₹{{ total_withdraw|floatformat:2 }}</div>
-        </div>
-    </div>
+<div class="stats-row">
+    <div class="stat-mini-card"><div class="stat-mini-label">Total Deposited</div><div class="stat-mini-value" id="totalDeposit">₹{{ total_deposit|floatformat:2 }}</div></div>
+    <div class="stat-mini-card"><div class="stat-mini-label">Total Withdrawn</div><div class="stat-mini-value" id="totalWithdraw">₹{{ total_withdraw|floatformat:2 }}</div></div>
+</div>
 
-    <div class="info-grid">
-        <div class="info-card"><span>📧 Email</span><span id="userEmail">{{ user_email }}</span></div>
-        <div class="info-card"><span>📅 Joined</span><span id="joinedDate">{{ joined_date }}</span></div>
-    </div>
+<div class="info-grid">
+    <div class="info-card"><span>📧 Email</span><span>{{ user_email }}</span></div>
+    <div class="info-card"><span>📅 Joined</span><span>{{ joined_date }}</span></div>
+</div>
 
-    <div class="transactions-section">
-        <div class="transactions-title">📜 Transaction History</div>
-        <div id="transactionsList">
-            {% if transactions %}
-                {% for transaction in transactions %}
-                <div class="transaction-item" data-txn-id="{{ transaction.transaction_id }}">
-                    <div class="transaction-left">
-                        <div class="transaction-id">{{ transaction.transaction_id }}</div>
-                        <div class="transaction-type">{{ transaction.get_transaction_type_display }}</div>
-                        <div class="transaction-date">{{ transaction.created_at|date:"d M Y, h:i A" }}</div>
-                        {% if transaction.utr_number %}
-                        <div class="transaction-id">UTR: {{ transaction.utr_number }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="transaction-right">
-                        <div class="transaction-amount 
-                            {% if transaction.transaction_type == 'DEPOSIT' %}deposit-amount
-                            {% elif transaction.transaction_type == 'WITHDRAW' %}withdraw-amount
-                            {% elif transaction.transaction_type == 'WIN_REWARD' %}reward-amount
-                            {% endif %}">
-                            {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'WIN_REWARD' %}
-                            + ₹{{ transaction.amount }}
-                            {% else %}
-                            - ₹{{ transaction.amount }}
-                            {% endif %}
-                        </div>
-                        <div class="transaction-status status-{{ transaction.status|lower }}">{{ transaction.status }}</div>
-                    </div>
+<!-- DEPOSIT HISTORY -->
+<div class="history-section">
+    <div class="history-title"><span>💰</span> Deposit History</div>
+    <div id="depositHistory">
+        {% for t in transactions %}
+            {% if t.transaction_type == 'DEPOSIT' %}
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-id">{{ t.transaction_id }}</div>
+                    <div class="transaction-date">{{ t.created_at|date:"d M Y, h:i A" }}</div>
+                    {% if t.utr_number %}<div class="transaction-id">UTR: {{ t.utr_number }}</div>{% endif %}
                 </div>
-                {% endfor %}
-            {% else %}
-                <p style="text-align: center; color: #666;">No transactions yet.</p>
+                <div class="transaction-right">
+                    <div class="transaction-amount deposit-amount">+ ₹{{ t.amount }}</div>
+                    <div class="transaction-status status-{{ t.status|lower }}">{{ t.status }}</div>
+                </div>
+            </div>
             {% endif %}
+        {% empty %}
+            <div class="empty-state">No deposit transactions yet</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- WITHDRAWAL HISTORY -->
+<div class="history-section">
+    <div class="history-title"><span>💸</span> Withdrawal History</div>
+    <div id="withdrawHistory">
+        {% for t in transactions %}
+            {% if t.transaction_type == 'WITHDRAW' %}
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-id">{{ t.transaction_id }}</div>
+                    <div class="transaction-date">{{ t.created_at|date:"d M Y, h:i A" }}</div>
+                    {% if t.upi_id %}<div class="transaction-id">UPI: {{ t.upi_id }}</div>{% endif %}
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount withdraw-amount">- ₹{{ t.amount }}</div>
+                    <div class="transaction-status status-{{ t.status|lower }}">{{ t.status }}</div>
+                </div>
+            </div>
+            {% endif %}
+        {% empty %}
+            <div class="empty-state">No withdrawal transactions yet</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- WIN REWARDS HISTORY -->
+<div class="history-section">
+    <div class="history-title"><span>🏆</span> Win Rewards History</div>
+    <div id="winHistory">
+        {% for t in transactions %}
+            {% if t.transaction_type == 'WIN_REWARD' %}
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-id">{{ t.transaction_id }}</div>
+                    <div class="transaction-date">{{ t.created_at|date:"d M Y, h:i A" }}</div>
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount reward-amount">+ ₹{{ t.amount }}</div>
+                    <div class="transaction-status status-{{ t.status|lower }}">{{ t.status }}</div>
+                </div>
+            </div>
+            {% endif %}
+        {% empty %}
+            <div class="empty-state">No win rewards yet</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="text-align: center; margin: 20px;">
+    <button class="btn-withdraw" style="width: 200px;" onclick="handleLogout()">🚪 Logout</button>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <h3>💰 Deposit Money</h3>
+        <p style="font-size: 12px;">Min ₹10 | Max ₹50,000</p>
+        <div class="amount-options">
+            <button class="amount-option" onclick="selectAmount(100)">₹100</button>
+            <button class="amount-option" onclick="selectAmount(200)">₹200</button>
+            <button class="amount-option" onclick="selectAmount(500)">₹500</button>
+            <button class="amount-option" onclick="selectAmount(1000)">₹1,000</button>
+            <button class="amount-option" onclick="selectAmount(2000)">₹2,000</button>
+            <button class="amount-option" onclick="selectAmount(5000)">₹5,000</button>
         </div>
-    </div>
-
-    <div class="logout-btn-container" style="text-align: center; margin: 20px;">
-        <button class="btn-withdraw" style="width: 200px;" onclick="handleLogout()">🚪 Logout</button>
-    </div>
-
-    <!-- DEPOSIT MODAL -->
-    <div id="depositModal" class="modal"><div class="modal-content"><h3>💰 Deposit Money</h3>
-        <div class="amount-options"><button class="amount-option" onclick="selectAmount(100)">₹100</button><button class="amount-option" onclick="selectAmount(200)">₹200</button><button class="amount-option" onclick="selectAmount(500)">₹500</button><button class="amount-option" onclick="selectAmount(1000)">₹1,000</button><button class="amount-option" onclick="selectAmount(2000)">₹2,000</button><button class="amount-option" onclick="selectAmount(5000)">₹5,000</button></div>
         <input type="number" id="depositAmount" class="modal-input" placeholder="Custom amount" min="10">
-        <button class="btn-deposit" style="width:100%" onclick="getPaymentDetails()">Proceed</button>
-        <button class="back-btn" style="width:100%; margin-top:10px" onclick="closeModals()">Cancel</button>
-    </div></div>
+        <button class="btn-deposit" style="width:100%" onclick="getPaymentDetails()">Proceed to Payment</button>
+        <button class="btn-close-modal" onclick="closeDepositModalWithoutPayment()">Cancel</button>
+    </div>
+</div>
 
-    <!-- PAYMENT MODAL -->
-    <div id="paymentModal" class="modal"><div class="modal-content"><h3>💳 Complete Payment</h3>
-        <div class="payment-amount-display"><div class="amount" id="paymentAmount">₹0</div></div>
-        <div class="upi-section"><div class="upi-id" id="upiIdDisplay"></div><button class="btn-copy" onclick="copyUPI()">Copy UPI ID</button></div>
-        <input type="hidden" id="paymentTransactionId"><input type="hidden" id="paymentAmountHidden">
+<!-- PAYMENT MODAL -->
+<!-- PAYMENT MODAL - CORRECTED VERSION -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <h3>💳 Complete Payment</h3>
+        <div class="payment-amount-display"><div class="amount" id="paymentAmount" style="font-size:32px; color:var(--gold);">₹0</div></div>
+        
+        <div class="qr-section">
+            <div class="qr-code"><img id="qrCodeImage" src="" alt="QR Code"></div>
+            <div class="qr-text">📸 Scan QR Code with any UPI app</div>
+        </div>
+        
+        <div class="upi-section">
+            <div class="upi-id" id="upiIdDisplay">Loading...</div>
+            <button class="btn-copy" onclick="copyUPI()">📋 Copy UPI ID</button>
+        </div>
+        
+        <div class="payment-apps">
+            <button class="app-btn app-phonepe" onclick="openApp('phonepe')">📱 PhonePe</button>
+            <button class="app-btn app-googlepay" onclick="openApp('googlepay')">💳 GPay</button>
+            <button class="app-btn app-paytm" onclick="openApp('paytm')">🏦 Paytm</button>
+            <button class="app-btn app-bhim" onclick="openApp('bhim')">🆔 BHIM</button>
+        </div>
+        
+        <div class="important-note">
+            <div class="note-title">⚠️ IMPORTANT</div>
+            <p>1️⃣ Send <span style="background:#fff3e0; padding:2px 6px;">exact amount</span> to UPI ID or scan QR</p>
+            <p>2️⃣ After payment, you will get a <span style="background:#fff3e0; padding:2px 6px;">UTR Number</span></p>
+            <p>3️⃣ Enter UTR Number below and click Verify</p>
+            <p>4️⃣ Money will be added <span style="background:#fff3e0; padding:2px 6px;">INSTANTLY</span> to your wallet</p>
+        </div>
+        
+        <input type="hidden" id="paymentTransactionId">
+        <input type="hidden" id="paymentAmountHidden">
         <input type="text" id="utrNumber" class="modal-input" placeholder="Enter UTR Number">
-        <button class="btn-deposit" style="width:100%" onclick="submitUTR()">Verify & Add Balance</button>
-        <button class="back-btn" style="width:100%; margin-top:10px" onclick="closePaymentModal()">Back</button>
-    </div></div>
+        <button class="btn-deposit" style="width:100%" onclick="submitUTR()">✅ Verify UTR & Add Balance</button>
+        <button class="btn-close-modal" onclick="closePaymentModal()">← Back</button>
+    </div>
+</div>
 
-    <!-- WITHDRAW MODAL -->
-    <div id="withdrawModal" class="modal"><div class="modal-content"><h3>💸 Withdraw Money</h3>
-        <div class="amount-options"><button class="amount-option" onclick="selectWithdrawAmount(100)">₹100</button><button class="amount-option" onclick="selectWithdrawAmount(200)">₹200</button><button class="amount-option" onclick="selectWithdrawAmount(500)">₹500</button><button class="amount-option" onclick="selectWithdrawAmount(1000)">₹1,000</button><button class="amount-option" onclick="selectWithdrawAmount(2000)">₹2,000</button><button class="amount-option" onclick="selectWithdrawAmount(5000)">₹5,000</button></div>
+<!-- WITHDRAW MODAL -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <h3>💸 Withdraw Money</h3>
+        <p style="font-size: 12px;">Min ₹50 | Balance: ₹<span id="currentBalance">{{ wallet_balance|floatformat:2 }}</span></p>
+        <p style="font-size: 11px; color: #ff9800;">⚠️ Funds will be on hold until admin approval</p>
+        <div class="amount-options">
+            <button class="amount-option" onclick="selectWithdrawAmount(100)">₹100</button>
+            <button class="amount-option" onclick="selectWithdrawAmount(200)">₹200</button>
+            <button class="amount-option" onclick="selectWithdrawAmount(500)">₹500</button>
+            <button class="amount-option" onclick="selectWithdrawAmount(1000)">₹1,000</button>
+        </div>
         <input type="number" id="withdrawAmount" class="modal-input" placeholder="Custom amount" min="50">
         <input type="text" id="withdrawUpiId" class="modal-input" placeholder="Your UPI ID">
         <button class="btn-withdraw" style="width:100%" onclick="submitWithdraw()">Request Withdrawal</button>
-        <button class="back-btn" style="width:100%; margin-top:10px" onclick="closeModals()">Cancel</button>
-    </div></div>
+        <button class="btn-close-modal" onclick="closeModals()">Cancel</button>
+    </div>
+</div>
 
-    <nav class="nav">
-        <div class="nav-item" onclick="window.location.href='/mine/'"><span>🏠</span>Home</div>
-        <div class="nav-item" onclick="window.location.href='/history/'"><span>📜</span>History</div>
-        <div class="nav-item active"><span>👤</span>Account</div>
-    </nav>
+<nav class="nav">
+    <div class="nav-item" onclick="window.location.href='/mine/'"><span>🏠</span>Home</div>
+    <div class="nav-item" onclick="window.location.href='/history/'"><span>📜</span>History</div>
+    <div class="nav-item active"><span>👤</span>Account</div>
+</nav>
 
-    <script>
-        let currentTransactionId = '', currentUpiId = '', currentAmount = 0;
+<script>
+    let currentTransactionId = '', currentUpiId = '', currentAmount = 0, currentDepositAmount = 0;
+
+    function goBack() { window.location.href = '/mine/'; }
+    
+    function openDepositModal() { 
+        document.getElementById('depositModal').style.display = 'flex'; 
+        document.getElementById('depositAmount').value = '';
+    }
+    
+    function openWithdrawModal() { 
+        document.getElementById('withdrawModal').style.display = 'flex'; 
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('withdrawUpiId').value = '';
+    }
+    
+    function closeModals() { 
+        document.getElementById('depositModal').style.display = 'none'; 
+        document.getElementById('withdrawModal').style.display = 'none'; 
+    }
+    
+    function closeDepositModalWithoutPayment() {
+        document.getElementById('depositModal').style.display = 'none';
+        // Deposit failed - show in history? Backend ne kuch create nahi kiya toh history mein kuch nahi aayega
+        showMessage('Deposit cancelled', 'error');
+    }
+    
+    function closePaymentModal() { 
+        document.getElementById('paymentModal').style.display = 'none'; 
+        document.getElementById('utrNumber').value = '';
+        // Open deposit modal again
+        document.getElementById('depositModal').style.display = 'flex';
+    }
+    
+    function selectAmount(amt) { document.getElementById('depositAmount').value = amt; }
+    function selectWithdrawAmount(amt) { document.getElementById('withdrawAmount').value = amt; }
+    
+    function copyUPI() { 
+    if (currentUpiId) {
+        navigator.clipboard.writeText(currentUpiId); 
+        showMessage('UPI ID copied: ' + currentUpiId, 'success'); 
+    } else {
+        showMessage('No UPI ID available', 'error');
+    }
+}
+
+    
+    async function getPaymentDetails() {
+    let amount = document.getElementById('depositAmount').value;
+    if (!amount || amount < 10) { showMessage('Minimum ₹10', 'error'); return; }
+    if (amount > 50000) { showMessage('Maximum ₹50,000', 'error'); return; }
+    
+    currentDepositAmount = parseFloat(amount);
+    
+    const btn = document.querySelector('#depositModal .btn-deposit');
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    
+    try {
+        const res = await fetch('/api/get-payment-details/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ amount: currentDepositAmount })
+        });
+        const data = await res.json();
         
-        // Auto-refresh every 10 seconds (admin se approval hua to update dikhega)
-        setInterval(() => { refreshAllData(); }, 10000);
-        
-        async function refreshAllData() {
-            try {
-                const response = await fetch('/api/account-data/', {
-                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    // Update balance
-                    document.getElementById('walletBalance').innerHTML = `₹${data.balance}`;
-                    document.getElementById('totalDeposit').innerHTML = `₹${data.total_deposit}`;
-                    document.getElementById('totalWithdraw').innerHTML = `₹${data.total_withdraw}`;
-                    
-                    // Update transactions list
-                    const txnContainer = document.getElementById('transactionsList');
-                    if (data.transactions && data.transactions.length > 0) {
-                        txnContainer.innerHTML = '';
-                        data.transactions.forEach(t => {
-                            let amountClass = '';
-                            let amountSymbol = '';
-                            if (t.type === 'DEPOSIT' || t.type === 'WIN_REWARD') {
-                                amountClass = 'deposit-amount';
-                                amountSymbol = '+';
-                            } else if (t.type === 'WITHDRAW') {
-                                amountClass = 'withdraw-amount';
-                                amountSymbol = '-';
-                            }
-                            let statusClass = t.status === 'COMPLETED' ? 'status-completed' : (t.status === 'PENDING' ? 'status-pending' : 'status-failed');
-                            txnContainer.innerHTML += `
-                                <div class="transaction-item">
-                                    <div class="transaction-left">
-                                        <div class="transaction-id">${t.id}</div>
-                                        <div class="transaction-type">${t.type_display}</div>
-                                        <div class="transaction-date">${t.date}</div>
-                                        ${t.utr ? `<div class="transaction-id">UTR: ${t.utr}</div>` : ''}
-                                    </div>
-                                    <div class="transaction-right">
-                                        <div class="transaction-amount ${amountClass}">${amountSymbol} ₹${t.amount}</div>
-                                        <div class="transaction-status ${statusClass}">${t.status}</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-                    showMessage('Account updated!', 'success');
-                }
-            } catch(e) { console.log("Refresh error"); }
+        if (data.status === 'success') {
+            currentTransactionId = data.transaction_id;
+            currentUpiId = data.upi_id;  // This gets the UPI ID from backend
+            currentAmount = data.amount;
+            
+            document.getElementById('paymentAmount').innerHTML = `₹${data.amount}`;
+            document.getElementById('upiIdDisplay').innerHTML = data.upi_id;  // Set UPI ID
+            document.getElementById('paymentTransactionId').value = data.transaction_id;
+            document.getElementById('paymentAmountHidden').value = data.amount;
+            
+            // Set QR code image if provided
+            if (data.qr_code_url) {
+                document.getElementById('qrCodeImage').src = data.qr_code_url;
+            } else {
+                // Show placeholder or hide QR section
+                document.getElementById('qrCodeImage').style.display = 'none';
+            }
+            
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('paymentModal').style.display = 'flex';
+        } else {
+            showMessage(data.message, 'error');
         }
+    } catch(error) {
+        showMessage('Something went wrong!', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Proceed to Payment';
+    }
+}
+   function openApp(appName) {
+    const upi = currentUpiId;
+    const amount = currentAmount;
+    const name = "MinesGame";
+    const note = "Deposit to Mines Game Wallet";
+    
+    if (!upi) {
+        showMessage('UPI ID not available', 'error');
+        return;
+    }
+    
+    let url = '';
+    
+    // Create UPI payment URL
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+    
+    switch(appName) {
+        case 'phonepe':
+            url = `phonepe://pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+            break;
+        case 'googlepay':
+            url = `tez://upi/pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+            break;
+        case 'paytm':
+            url = `paytmmp://pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+            break;
+        case 'bhim':
+            url = `bhim://upi/pay?pa=${upi}&pn=${name}&am=${amount}&cu=INR`;
+            break;
+    }
+    
+    // Try to open the app-specific URL, fallback to generic UPI
+    if (url) {
+        window.location.href = url;
+    } else {
+        window.location.href = upiUrl;
+    }
+    
+    // Fallback: show UPI ID if app doesn't open
+    setTimeout(() => {
+        showMessage(`If app doesn't open, send ₹${amount} to ${upi}`, 'info');
+    }, 1000);
+}
+    async function submitUTR() {
+        const utr = document.getElementById('utrNumber').value.trim();
+        const txnId = document.getElementById('paymentTransactionId').value;
+        const amount = document.getElementById('paymentAmountHidden').value;
         
-        async function submitWithdraw() {
-            const amount = document.getElementById('withdrawAmount').value;
-            const upiId = document.getElementById('withdrawUpiId').value;
-            if (!amount || amount < 50) { showMessage('Minimum ₹50', 'error'); return; }
-            if (!upiId || !upiId.includes('@')) { showMessage('Valid UPI ID required', 'error'); return; }
-            
-            const btn = document.querySelector('#withdrawModal .btn-withdraw');
-            btn.disabled = true; btn.textContent = 'Processing...';
-            
-            try {
-                const res = await fetch('/api/request-withdrawal/', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                    body: JSON.stringify({ amount: parseFloat(amount), upi_id: upiId })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    showMessage(data.message, 'success');
-                    closeModals();
-                    setTimeout(() => refreshAllData(), 1000);
-                } else { showMessage(data.message, 'error'); }
-            } catch(e) { showMessage('Error!', 'error'); }
-            finally { btn.disabled = false; btn.textContent = 'Request Withdrawal'; }
-        }
+        if (!utr) { showMessage('❌ Please enter UTR number', 'error'); return; }
+        if (utr.length < 8) { showMessage('❌ Enter valid UTR number (min 8 characters)', 'error'); return; }
         
-        async function submitUTR() {
-            const utr = document.getElementById('utrNumber').value.trim();
-            const txnId = document.getElementById('paymentTransactionId').value;
-            const amount = document.getElementById('paymentAmountHidden').value;
-            if (!utr || utr.length < 8) { showMessage('Valid UTR required', 'error'); return; }
-            
+        const btn = document.querySelector('#paymentModal .btn-deposit');
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        
+        try {
             const res = await fetch('/api/verify-utr/', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
                 body: JSON.stringify({ transaction_id: txnId, utr_number: utr, amount: parseFloat(amount) })
             });
             const data = await res.json();
+            
             if (data.status === 'success') {
                 showMessage(data.message, 'success');
-                closePaymentModal();
-                setTimeout(() => refreshAllData(), 1000);
-            } else { showMessage(data.message, 'error'); }
+                document.getElementById('paymentModal').style.display = 'none';
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                showMessage(data.message, 'error');
+                btn.disabled = false;
+                btn.textContent = '✅ Verify UTR & Add Balance';
+            }
+        } catch(error) {
+            showMessage('Something went wrong!', 'error');
+            btn.disabled = false;
+            btn.textContent = '✅ Verify UTR & Add Balance';
         }
+    }
+    
+    async function submitWithdraw() {
+        const amount = document.getElementById('withdrawAmount').value;
+        const upiId = document.getElementById('withdrawUpiId').value;
+        const balance = {{ wallet_balance|floatformat:2 }};
         
-        async function getPaymentDetails() {
-            let amount = document.getElementById('depositAmount').value;
-            if (!amount || amount < 10) { showMessage('Minimum ₹10', 'error'); return; }
-            const res = await fetch('/api/get-payment-details/', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-                body: JSON.stringify({ amount: parseFloat(amount) })
+        if (!amount || amount < 50) { showMessage('Minimum ₹50', 'error'); return; }
+        if (amount > balance) { showMessage('Insufficient balance!', 'error'); return; }
+        if (!upiId || upiId.trim() === '') { showMessage('UPI ID required', 'error'); return; }
+        if (!upiId.includes('@')) { showMessage('Valid UPI ID required (e.g., name@bank)', 'error'); return; }
+        
+        const btn = document.querySelector('#withdrawModal .btn-withdraw');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        
+        try {
+            const res = await fetch('/api/request-withdrawal/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ amount: parseFloat(amount), upi_id: upiId })
             });
             const data = await res.json();
+            
             if (data.status === 'success') {
-                currentTransactionId = data.transaction_id; currentUpiId = data.upi_id; currentAmount = data.amount;
-                document.getElementById('paymentAmount').innerHTML = `₹${data.amount}`;
-                document.getElementById('upiIdDisplay').innerHTML = data.upi_id;
-                document.getElementById('paymentTransactionId').value = data.transaction_id;
-                document.getElementById('paymentAmountHidden').value = data.amount;
-                closeModals(); document.getElementById('paymentModal').style.display = 'flex';
-            } else { showMessage(data.message, 'error'); }
+                showMessage(data.message, 'success');
+                closeModals();
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                showMessage(data.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Request Withdrawal';
+            }
+        } catch(error) {
+            showMessage('Error!', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Request Withdrawal';
         }
-        
-        function selectAmount(amt) { document.getElementById('depositAmount').value = amt; }
-        function selectWithdrawAmount(amt) { document.getElementById('withdrawAmount').value = amt; }
-        function copyUPI() { navigator.clipboard.writeText(currentUpiId); showMessage('Copied!', 'success'); }
-        function openDepositModal() { document.getElementById('depositModal').style.display = 'flex'; }
-        function openWithdrawModal() { document.getElementById('withdrawModal').style.display = 'flex'; }
-        function closeModals() { document.getElementById('depositModal').style.display = 'none'; document.getElementById('withdrawModal').style.display = 'none'; }
-        function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; document.getElementById('utrNumber').value = ''; }
-        function goBack() { window.location.href = '/mine/'; }
-        function showMessage(msg, type) { let m = document.createElement('div'); m.className = `message message-${type}`; m.textContent = msg; document.body.appendChild(m); setTimeout(() => m.remove(), 3000); }
-        function handleLogout() { if(confirm('Logout?')) window.location.href = '/logout/'; }
-        function getCookie(name) { let value = null; if(document.cookie && document.cookie !== '') { let cookies = document.cookie.split(';'); for(let c of cookies) { let cookie = c.trim(); if(cookie.substring(0, name.length+1) === (name + '=')) { value = decodeURIComponent(cookie.substring(name.length+1)); break; } } } return value; }
-    </script>
+    }
+    
+    function showMessage(msg, type) {
+        let m = document.createElement('div');
+        m.className = `message message-${type}`;
+        m.textContent = msg;
+        document.body.appendChild(m);
+        setTimeout(() => m.remove(), 4000);
+    }
+    
+    function handleLogout() { if(confirm('Logout?')) window.location.href = '/logout/'; }
+    
+    function getCookie(name) {
+        let v = null;
+        if(document.cookie) {
+            let c = document.cookie.split(';');
+            for(let ck of c) {
+                let cookie = ck.trim();
+                if(cookie.substring(0, name.length+1) === (name + '=')) {
+                    v = decodeURIComponent(cookie.substring(name.length+1));
+                    break;
+                }
+            }
+        }
+        return v;
+    }
+</script>
 </body>
 </html>

@@ -80,7 +80,7 @@
     const usernameValue = document.getElementById('loginUsername').value; // 'Anup'
     const passwordValue = document.getElementById('loginPassword').value;
 
-    const res = await fetch('http://127.0.0.1:8000/api/login/', {
+    const res = await fetch('http://192.168.1.221:8000/api/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -104,7 +104,7 @@
         if(!email) return alert("Email taka!");
 
         // Django kade check kara ki ha email register aahe ka
-        const res = await fetch('http://127.0.0.1:8000/api/check-email/', {
+        const res = await fetch('http://192.168.1.221:8000/api/check-email/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ email })
@@ -116,7 +116,7 @@
             const templateParams = {
                 user_email: email,
                 // Django cha token link (Tula local testing sathi ha URL lagel)
-                reset_link: `http://127.0.0.1:8000/login/?token=${data.token}`
+                reset_link: `http://192.168.1.221:8000/login/?token=${data.token}`
             };
 
             emailjs.send('service_7rnshj4', 'template_evrau9m', templateParams, 'hmFOSFSMZ9w6YN5hy')
@@ -140,7 +140,7 @@
             return alert("Passwords match nahi kar rahe!");
         }
 
-       const res = await fetch('http://127.0.0.1:8000/api/update-password/', {
+       const res = await fetch('http://192.168.1.221:8000/api/update-password/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ 

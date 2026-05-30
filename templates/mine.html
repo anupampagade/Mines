@@ -401,17 +401,23 @@
     </div>
 
     <div id="gameArea" style="display: none;">
-        <div class="stats-panel">
-            <div class="stat-item">🎲 BET <span class="stat-value" id="currentBet">₹10</span></div>
-            <div class="stat-item">💣 MINES <span class="stat-value" id="activeBombs" style="color:var(--red);">5</span></div>
-            <div class="stat-item">⚡ MULTI <span class="stat-value" id="currentMultiplier">1.00x</span></div>
-        </div>
-        <div id="gameBoard"></div>
-        <button id="cashoutBtn" class="btn btn-cashout" style="margin-top: 20px; max-width: 280px; display: none;" onclick="playerCashout()">
-            💰 CASHOUT <span id="cashoutAmount">0.00</span> ₹
-        </button>
-        <button class="btn btn-restart" style="margin-top: 15px; max-width: 280px;" onclick="showBetFormAgain()">🔄 NEW GAME</button>
+    <div class="stats-panel">
+        <div class="stat-item">🎲 BET <span class="stat-value" id="currentBet">₹10</span></div>
+        <div class="stat-item">💣 MINES <span class="stat-value" id="activeBombs" style="color:var(--red);">5</span></div>
+        <div class="stat-item">⚡ MULTI <span class="stat-value" id="currentMultiplier">1.00x</span></div>
     </div>
+    <div id="gameBoard"></div>
+    
+    <!-- 🔥 CASHOUT BUTTON (Game active time dikhega) -->
+    <button id="cashoutBtn" class="btn btn-cashout" style="margin-top: 20px; max-width: 280px; display: none;" onclick="playerCashout()">
+        💰 CASHOUT <span id="cashoutAmount">0.00</span> ₹
+    </button>
+    
+    <!-- 🔥 NEW GAME BUTTON (Cashout ke baad dikhega) -->
+    <button id="newGameBtn" class="btn btn-restart" style="margin-top: 20px; max-width: 280px; display: none;" onclick="resetAndShowBetForm()">
+        🎮 NEW GAME
+    </button>
+   </div>
 </div>
 
 <!-- WIN MODAL -->
@@ -571,14 +577,22 @@
     }
 
     function updateStatsUI() {
-        let mult = calcMultiplier();
-        document.getElementById('currentMultiplier').innerHTML = mult + 'x';
-        let cashoutVal = (betAmount * mult).toFixed(2);
-        document.getElementById('cashoutAmount').innerText = cashoutVal;
-        if(safeRevealed > 0) {
-            document.getElementById('cashoutBtn').style.display = 'block';
-        }
+    let mult = calcMultiplier();
+    document.getElementById('currentMultiplier').innerHTML = mult + 'x';
+    let cashoutVal = (betAmount * mult).toFixed(2);
+    document.getElementById('cashoutAmount').innerText = cashoutVal;
+    
+    // 🔥 Game active hai toh CASHOUT button show, NEW GAME hide
+    if(gameActive && safeRevealed > 0) {
+        document.getElementById('cashoutBtn').style.display = 'block';
+        document.getElementById('newGameBtn').style.display = 'none';
+    } else if(!gameActive && safeRevealed > 0) {
+        // Cashout ho chuka hai
+        document.getElementById('cashoutBtn').style.display = 'none';
+        document.getElementById('newGameBtn').style.display = 'block';
     }
+}
+
 
     function toggleModal(id, show) {
         const modal = document.getElementById(id);
@@ -725,20 +739,24 @@
     }
     
     async function playerCashout() {
-        if(!gameActive || safeRevealed === 0) return;
-        gameActive = false;
-        const mult = calcMultiplier();
-        const winAmountVal = (betAmount * mult).toFixed(2);
-        document.getElementById('winAmount').innerText = `₹${winAmountVal}`;
-        
-        await addWinToWallet(parseFloat(winAmountVal));
-        
-        toggleModal('winModal', true);
-        canvasConfetti({ particleCount: 120, spread: 55, origin: { y: 0.6 }, startVelocity: 12 });
-        playBeep(800, 0.12);
-        playBeep(1000, 0.12);
-        playBeep(1250, 0.3);
-    }
+    if(!gameActive || safeRevealed === 0) return;
+    gameActive = false;
+    const mult = calcMultiplier();
+    const winAmountVal = (betAmount * mult).toFixed(2);
+    document.getElementById('winAmount').innerText = `₹${winAmountVal}`;
+    
+    await addWinToWallet(parseFloat(winAmountVal));
+    
+    // 🔥 CASHOUT button hide, NEW GAME button show
+    document.getElementById('cashoutBtn').style.display = 'none';
+    document.getElementById('newGameBtn').style.display = 'block';
+    
+    toggleModal('winModal', true);
+    canvasConfetti({ particleCount: 120, spread: 55, origin: { y: 0.6 }, startVelocity: 12 });
+    playBeep(800, 0.12);
+    playBeep(1000, 0.12);
+    playBeep(1250, 0.3);
+}
     
     // SCRATCH LOGIC
     async function openScratchStep() {
@@ -896,6 +914,33 @@
     document.body.addEventListener('click', function initClickAudio() {
         initAudio();
     }, { once: true });
+
+function resetAndShowBetForm() {
+    // Game reset
+    gameActive = false;
+    safeRevealed = 0;
+    minePositions = [];
+    
+    // Hide game area, show bet form
+    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('betFormPanel').style.display = 'block';
+    
+    // Hide both buttons
+    document.getElementById('cashoutBtn').style.display = 'none';
+    document.getElementById('newGameBtn').style.display = 'none';
+    
+    // Clear board
+    document.getElementById('gameBoard').innerHTML = '';
+    
+    // Reset multiplier display
+    document.getElementById('currentMultiplier').innerHTML = '1.00x';
+    document.getElementById('cashoutAmount').innerText = '0.00';
+    
+    // Refresh wallet balance
+    fetchWalletBalance();
+    
+    console.log("🔄 New game ready");
+}
 </script>
 </body>
 </html>

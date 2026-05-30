@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-tce%vq_%)e8puyblw&@(o#x_308x!_iv=!_8_@j6u7_)e78s_k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -149,4 +149,4 @@ NEXTPAY_WEBHOOK_SECRET = 'your_webhook_secret_here'  # For signature verificatio
 
 # For PhonePe integration (if using direct PhonePe)
 # settings.py - Add your business UPI ID
-BUSINESS_UPI_ID = "yourbusiness@okhdfcbank"  # <--- APNA UPI ID DALO
+BUSINESS_UPI_ID = "8806261014@ybl"  # <--- APNA UPI ID DALO
