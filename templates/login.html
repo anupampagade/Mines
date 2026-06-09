@@ -77,34 +77,45 @@
     // --- 1. LOGIN LOGIC ---
     // --- 1. LOGIN LOGIC (Django Connect) ---
    async function handleLogin() {
-    const usernameValue = document.getElementById('loginUsername').value; // 'Anup'
+    const usernameValue = document.getElementById('loginUsername').value;
     const passwordValue = document.getElementById('loginPassword').value;
-
-    const res = await fetch('http://192.168.1.221:8000/api/login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            username: usernameValue, 
-            password: passwordValue 
-        })
-    });
-
-    const data = await res.json();
-    if (data.status === "success") {
-       
-        alert("Login Successful!");
-        window.location.href = "/mine"; 
-    } else {
-        alert(data.message);
+    
+    if (!usernameValue || !passwordValue) {
+        alert("Please enter username and password");
+        return;
+    }
+    
+    try {
+        // 🔥 IMPORTANT: ही URL बरोबर आहे का ते पहा
+        const res = await fetch('/api/login/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: usernameValue, 
+                password: passwordValue 
+            })
+        });
+        
+        const data = await res.json();
+        console.log("Response:", data);  // Console मध्ये बघ काय येतं
+        
+        if (data.status === "success") {
+            alert("✅ Login Successful!");
+            window.location.href = "/mine/";
+        } else {
+            alert("❌ " + data.message);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Server connect nahi ho raha! Django server chalu aahe ka?");
     }
 }
-    // --- 2. FORGOT PASSWORD (Django + EmailJS) ---
     async function sendResetEmail() {
         const email = document.getElementById('resetEmail').value;
         if(!email) return alert("Email taka!");
 
         // Django kade check kara ki ha email register aahe ka
-        const res = await fetch('http://192.168.1.221:8000/api/check-email/', {
+        const res = await fetch('/api/check-email/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ email })
@@ -116,7 +127,7 @@
             const templateParams = {
                 user_email: email,
                 // Django cha token link (Tula local testing sathi ha URL lagel)
-                reset_link: `http://192.168.1.221:8000/login/?token=${data.token}`
+                reset_link: `/api/login/?token=${data.token}`
             };
 
             emailjs.send('service_7rnshj4', 'template_evrau9m', templateParams, 'hmFOSFSMZ9w6YN5hy')
@@ -140,7 +151,7 @@
             return alert("Passwords match nahi kar rahe!");
         }
 
-       const res = await fetch('http://192.168.1.221:8000/api/update-password/', {
+       const res = await fetch('/api/update-password/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ 
