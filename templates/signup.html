@@ -101,25 +101,26 @@
     </div>
 </div>
 <script>
-    // 1. Password Show/Hide Function (Tera Original)
-    function togglePass(id) {
-        const input = document.getElementById(id);
-        const icon = input.nextElementSibling;
-        if (input.type === "password") {
-            input.type = "text";
-            icon.textContent = "👁️";
-        } else {
-            input.type = "password";
-            icon.innerHTML = "🔒";
+// CSRF token मिळवा
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
     }
+    return cookieValue;
+}
 
-    // 2. Form Submit Function
-   // Sign Up Form cha Script Section
 document.getElementById('signupForm').addEventListener('submit', async function(e) {
     e.preventDefault(); 
     
-    const username = document.getElementById('regUsername').value; // User cha Nickname
+    const username = document.getElementById('regUsername').value;
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const confirmPass = document.getElementById('confirmPassword').value;
@@ -129,38 +130,31 @@ document.getElementById('signupForm').addEventListener('submit', async function(
         return;
     }
 
-    // --- TUZYA LOGIC NUSAR UNIQUE ID GENERATE KARNE ---
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const numbers = "0123456789";
-    let uniqueID = ""; 
-    for (let i = 0; i < 3; i++) uniqueID += letters.charAt(Math.floor(Math.random() * letters.length));
-    for (let i = 0; i < 4; i++) uniqueID += numbers.charAt(Math.floor(Math.random() * numbers.length));
-
     try {
-        // --- DJANGO API CALL ---
-        // --- DJANGO API CALL ---
-       const response = await fetch('http://192.168.1.221:8000/api/signup/', {
+        const response = await fetch('/api/signup/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')  // ← CSRF token घातला
+            },
             body: JSON.stringify({ 
-                username: username,  // <--- 'nickname' chya jagi 'username' kara
+                username: username,
                 email: email, 
-                password: password,
-                user_id: uniqueID    
+                password: password
             })
         });
 
         const data = await response.json();
 
-     if (data.status === "success") {
-            alert("✅ Account Banlay! Aata Login kar.");
-            window.location.href = "/login"; 
+        if (data.status === "success") {
+            alert("✅ Account created successfully! Please login.");
+            window.location.href = "/login/";
         } else {
-            // Ithe check kar kay message yetoy
-            alert("❌ Error: " + data.message); 
+            alert("❌ Error: " + data.message);
         }
     } catch (error) {
-        alert("Django Server chalu aahe ka check kar!");
+        console.error('Error:', error);
+        alert("Server error! Please check if Django server is running.");
     }
 });
 </script>
